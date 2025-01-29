@@ -8,6 +8,11 @@ export const eventSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   status: z.string().nullable().default("UPCOMING"),
+  isActive: z.string().nullable().default("false"),
+  isCompleted: z.string().nullable().default("false"),
+  winner1: z.string().nullable().default(""),
+  winner2: z.string().nullable().default(""),
+  winner3: z.string().nullable().default(""),
 });
 
 export const refinedEventSchema = eventSchema.refine(

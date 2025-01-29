@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -60,13 +59,10 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Event Name</FormLabel>
               <FormControl>
                 <Input placeholder="hackathon2025" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -76,13 +72,10 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="hackathon2025" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -92,7 +85,7 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
           name="startDate"
           render={({ field: { value, onChange, ...fieldProps } }) => (
             <FormItem>
-              <FormLabel>Start Datetime</FormLabel>
+              <FormLabel>Start Date</FormLabel>
               <FormControl>
                 <div className="">
                   <DateTimePicker
@@ -103,9 +96,6 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
                   <Input type="hidden" value={value} {...fieldProps} />
                 </div>
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -115,7 +105,7 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
           name="endDate"
           render={({ field: { value, onChange, ...fieldProps } }) => (
             <FormItem>
-              <FormLabel>End Datetime</FormLabel>
+              <FormLabel>End Date</FormLabel>
               <FormControl>
                 <div className="">
                   <DateTimePicker
@@ -126,9 +116,6 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
                   <Input type="hidden" value={value} {...fieldProps} />
                 </div>
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
