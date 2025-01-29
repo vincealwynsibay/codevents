@@ -8,7 +8,6 @@ export const eventSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   status: z.string().nullable().default("UPCOMING"),
-  isPublished: z.boolean().nullable().default(false),
 });
 
 export const refinedEventSchema = eventSchema.refine(
@@ -34,4 +33,13 @@ export const refinedExistingEventSchema = existingEventSchema.refine(
 
 export type EventPayload = z.infer<typeof eventSchema>;
 
-export const participantSchema = z.object({});
+export const participantSchema = z.object({
+  name: z.string().nonempty(),
+  email: z
+    .string()
+    .email()
+    .refine((value) => value.trimEnd().split("@")[1] == "umindanao.edu.ph", {
+      message: "Email must be a valid umindanao.edu.ph",
+    }),
+  eventId: z.string().nonempty(),
+});
