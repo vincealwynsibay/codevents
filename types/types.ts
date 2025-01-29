@@ -10,3 +10,10 @@ export type FormState = {
 export type Event = {
   id: string;
 } & EventPayload;
+
+export type Participant = {
+  id: string;
+  name: string;
+  email: string;
+  eventId: string;
+};
