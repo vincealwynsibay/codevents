@@ -13,6 +13,12 @@ export const eventSchema = z.object({
   winner1: z.string().nullable().default(""),
   winner2: z.string().nullable().default(""),
   winner3: z.string().nullable().default(""),
+  prize1: z.string().nonempty(),
+  prize2: z.string().nonempty(),
+  prize3: z.string().nonempty(),
+  prizeDescription1: z.string().nonempty(),
+  prizeDescription2: z.string().nonempty(),
+  prizeDescription3: z.string().nonempty(),
 });
 
 export const refinedEventSchema = eventSchema.refine(

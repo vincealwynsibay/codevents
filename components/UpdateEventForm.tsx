@@ -43,6 +43,12 @@ export default function UpdateEventForm({
       startDate: eventData.startDate ?? "",
       endDate: eventData.endDate ?? "",
       status: eventData.status ?? "",
+      prize1: eventData.prize1 ?? "",
+      prize2: eventData.prize2 ?? "",
+      prize3: eventData.prize3 ?? "",
+      prizeDescription1: eventData.prizeDescription1 ?? "",
+      prizeDescription2: eventData.prizeDescription2 ?? "",
+      prizeDescription3: eventData.prizeDescription3 ?? "",
     },
   });
 

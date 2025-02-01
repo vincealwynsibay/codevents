@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { db } from "./../firebase/clientApp";
 import { EventPayload, eventSchema } from "./../validation";
-import { Event, FormState } from "@/types/types";
+import { Event, FormState, Participant } from "@/types/types";
 import {
   addDoc,
   updateDoc,
@@ -72,15 +72,22 @@ export async function createEvent(
   formData: FormData
 ): Promise<FormState> {
   try {
-    console.log(formData);
+    console.log("test2", formData);
     const validatedFields = eventSchema.safeParse({
       name: formData.get("name"),
       description: formData.get("description"),
       startDate: formData.get("startDate"),
       endDate: formData.get("endDate"),
       status: formData.get("status"),
+      prize1: formData.get("prize1"),
+      prize2: formData.get("prize2"),
+      prize3: formData.get("prize3"),
+      prizeDescription1: formData.get("prizeDescription1"),
+      prizeDescription2: formData.get("prizeDescription2"),
+      prizeDescription3: formData.get("prizeDescription3"),
     });
 
+    console.log("test3", validatedFields);
     if (!validatedFields.success) {
       console.log(validatedFields.error);
       return {
@@ -102,7 +109,6 @@ export async function createEvent(
       };
     }
 
-    console.log(newEvent);
     return {
       message: "Event created successfully",
       success: true,
@@ -132,6 +138,12 @@ export async function updateEvent(
         startDate: formData.get("startDate"),
         endDate: formData.get("endDate"),
         status: formData.get("status"),
+        prize1: formData.get("prize1"),
+        prize2: formData.get("prize2"),
+        prize3: formData.get("prize3"),
+        prizeDescription1: formData.get("prizeDescription1"),
+        prizeDescription2: formData.get("prizeDescription2"),
+        prizeDescription3: formData.get("prizeDescription3"),
       });
 
     if (!validatedFields.success) {
@@ -294,29 +306,40 @@ export async function getWinners(eventId: string) {
     };
 
     if (!parsedEventData.isCompleted) {
-      return { message: "Event is not completed", success: false };
+      return { message: "Event is not completed123", success: false };
     }
-
-    // it's possible to not have any winners only fetch those that the winner is not null
 
     const q = query(
       collection(db, "participants"),
       where("eventId", "==", eventId)
     );
 
-    const participants = await getDocs(q);
+    const participants =
+      (await getDocs(q)).docs.map((doc) => {
+        return { ...(doc.data() as Participant), id: doc.id };
+      }) ?? [];
 
-    const winners = participants.docs.filter(
-      (participant) =>
-        participant.id === parsedEventData.winner1 ||
-        participant.id === parsedEventData.winner2 ||
-        participant.id === parsedEventData.winner3
-    );
+    const winner1 =
+      (participants.find(
+        (p) => p.id === parsedEventData.winner1
+      ) as Participant) ?? null;
+    const winner2 =
+      (participants.find(
+        (p) => p.id === parsedEventData.winner2
+      ) as Participant) ?? null;
+    const winner3 =
+      (participants.find(
+        (p) => p.id === parsedEventData.winner3
+      ) as Participant) ?? null;
+
+    console.log(winner1, winner2, winner3);
 
     return {
-      data: winners.map((winner) => {
-        return { ...(winner.data() as EventPayload), id: winner.id };
-      }),
+      data: {
+        winner1,
+        winner2,
+        winner3,
+      },
     };
   } catch (e) {
     return { message: e.message, success: false };
