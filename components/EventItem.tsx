@@ -29,15 +29,27 @@ import { closeEvent, deleteEvent, openEvent } from "@/lib/actions/event.action";
 import UpdateEventForm from "./UpdateEventForm";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { isBefore, parseISO } from "date-fns";
+import { format, isBefore, parseISO } from "date-fns";
 import WinnersForm from "./WinnersForm";
+import { Badge } from "./ui/badge";
+import { cn } from "@/lib/utils";
+import { Pencil, Trash } from "lucide-react";
+import Image from "next/image";
 
 export default function EventItem({
   eventData,
   participants,
+  winners,
 }: {
   eventData: Event;
   participants: Participant[];
+  winners:
+    | {
+        winner1: Participant;
+        winner2: Participant;
+        winner3: Participant;
+      }
+    | undefined;
 }) {
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
@@ -50,121 +62,195 @@ export default function EventItem({
   };
 
   return (
-    <div>
-      <h2>{eventData.name}</h2>
-      <p>{eventData.description}</p>
-      <span>{eventData.isActive ? "ACTIVE" : "INACTIVE"}</span>
-      <span>
-        {eventData.isCompleted
-          ? "Completed"
-          : isBefore(parseISO(eventData.startDate), new Date())
-          ? "Ongoing"
-          : "Upcoming"}
-      </span>
+    <div className="font-chakra border-white border-[1px] rounded-lg p-10">
+      <div className="flex flex-row items-center justify-between">
+        <h2 className="text-2xl font-bold">{eventData.name}</h2>
 
-      {/* onClick={async () => {
-            console.log(eventData.isCompleted);
-            if (eventData.isCompleted) {
-              await resetEvent(eventData.id);
-            } else {
-              await completeEvent(eventData.id);
-            }
-            router.refresh();
-          }} */}
-
-      {eventData.isActive && (
-        <Dialog open={open} onOpenChange={(value) => setOpen(value)}>
-          <DialogTrigger asChild>
-            <Button variant="outline">
-              {eventData.isCompleted ? "RESET" : "COMPLETE"}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add Winners</DialogTitle>
-              <DialogDescription>
-                Add winners to the event below
-              </DialogDescription>
-            </DialogHeader>
-            <WinnersForm
-              event={eventData}
-              handleUpdate={handleUpdate}
-              participants={participants}
-            />
-            <DialogFooter className="sm:justify-start">
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Close
-                </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {!eventData.isCompleted && (
-        <Button
-          onClick={async () => {
-            if (eventData.isActive) {
-              await closeEvent(eventData.id);
-            } else {
-              await openEvent(eventData.id);
-            }
-            router.refresh();
-          }}
-        >
-          {eventData.isActive ? "DEACTIVATE" : "ACTIVATE"}
-        </Button>
-      )}
-
-      <Dialog open={open2} onOpenChange={(value) => setOpen2(value)}>
-        <DialogTrigger asChild>
-          <Button variant="outline">Edit</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Event</DialogTitle>
-            <DialogDescription>
-              Update the event details below
-            </DialogDescription>
-          </DialogHeader>
-          <UpdateEventForm eventData={eventData} handleUpdate={handleUpdate} />
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
+        <div className="flex flex-row items-center gap-2 flex-wrap">
+          <Dialog open={open2} onOpenChange={(value) => setOpen2(value)}>
+            <DialogTrigger asChild>
+              <Button variant="ghost">
+                <Pencil />
               </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </DialogTrigger>
+            <DialogContent className="w-[95%] lg:max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Update Event</DialogTitle>
+                <DialogDescription>
+                  Update the event details below
+                </DialogDescription>
+              </DialogHeader>
+              <UpdateEventForm
+                eventData={eventData}
+                handleUpdate={handleUpdate}
+              />
+            </DialogContent>
+          </Dialog>
 
-      {/* Delete */}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button>Delete</Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              event.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+          {/* Delete */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost">
+                <Trash />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  event.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    await deleteEvent(eventData.id);
+                    router.refresh();
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row items-center gap-2">
+          <Badge
+            variant={eventData.isActive ? "default" : "outline"}
+            className={cn(!eventData.isActive && "border-primary")}
+          >
+            {eventData.isActive ? "ACTIVE" : "INACTIVE"}
+          </Badge>
+          <Badge variant={"outline"}>
+            {eventData.isCompleted
+              ? "COMPLETED"
+              : isBefore(parseISO(eventData.startDate), new Date())
+              ? "ONGOING"
+              : "UPCOMING"}
+          </Badge>
+        </div>
+
+        <p>
+          {format(parseISO(eventData.startDate), "PPP")}
+          {format(parseISO(eventData.startDate), "p")} -{" "}
+          {format(parseISO(eventData.endDate), "p")}
+        </p>
+        <p className="w-1/2">{eventData.description}</p>
+        <div className="">
+          <h3 className="text-xl font-bold">Prizes</h3>
+
+          <div className="flex flex-row items-center gap-4">
+            {eventData.prize1 && (
+              <div className="text-center ">
+                <Image
+                  className="mx-auto"
+                  src={eventData.prize1}
+                  alt="prize1"
+                  width={50}
+                  height={50}
+                />
+                <span className="text-sm text-[#aaaaaa]">
+                  {eventData.prizeDescription1}
+                </span>
+              </div>
+            )}
+            {eventData.prize2 && (
+              <div className="text-center ">
+                <Image
+                  className="mx-auto"
+                  src={eventData.prize2}
+                  alt="prize2"
+                  width={50}
+                  height={50}
+                />
+                <span className="text-sm text-[#aaaaaa]">
+                  {eventData.prizeDescription2}
+                </span>
+              </div>
+            )}
+            {eventData.prize3 && (
+              <div className="text-center ">
+                <Image
+                  className="mx-auto"
+                  src={eventData.prize3}
+                  alt="prize2"
+                  width={50}
+                  height={50}
+                />
+                <span className="text-sm text-[#aaaaaa]">
+                  {eventData.prizeDescription3}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+        {eventData.isCompleted && (
+          <div className="">
+            <h3 className="text-xl font-bold">Winners</h3>
+
+            {winners && (
+              <div className="flex flex-col gap-4">
+                {winners.winner1 && <span>🥇 {winners.winner1.name}</span>}
+                {winners.winner2 && <span>🥈 {winners.winner2.name}</span>}
+                {winners.winner3 && <span>🥉 {winners.winner3.name}</span>}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-row mx-auto lg:mx-0 items-center justify-end gap-4">
+          {eventData.isActive && (
+            <Dialog open={open} onOpenChange={(value) => setOpen(value)}>
+              <DialogTrigger asChild>
+                <Button variant="default">
+                  {eventData.isCompleted ? "RESET" : "COMPLETE"}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add Winners</DialogTitle>
+                  <DialogDescription>
+                    Add winners to the event below
+                  </DialogDescription>
+                </DialogHeader>
+                <WinnersForm
+                  event={eventData}
+                  handleUpdate={handleUpdate}
+                  participants={participants}
+                />
+                <DialogFooter className="sm:justify-start">
+                  <DialogClose asChild>
+                    <Button type="button" variant="secondary">
+                      Close
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {!eventData.isCompleted && (
+            <Button
               onClick={async () => {
-                await deleteEvent(eventData.id);
+                if (eventData.isActive) {
+                  await closeEvent(eventData.id);
+                } else {
+                  await openEvent(eventData.id);
+                }
                 router.refresh();
               }}
+              variant={"secondary"}
             >
-              Continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              {eventData.isActive ? "DEACTIVATE" : "ACTIVATE"}
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

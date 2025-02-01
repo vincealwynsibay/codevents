@@ -10,21 +10,27 @@ export default async function Page() {
 
   const serverDate = new Date();
   return (
-    <div>
-      <EventForm serverDate={serverDate} />
-      {events.data.map(async (eventData) => {
-        const participants = await getParticipants(eventData.id);
-        const winners = await getWinners(eventData.id);
-        console.log(winners);
+    <div className="max-w-7xl px-10 mx-auto">
+      <div className="flex flex-row items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold font-chakra">Events</h2>
+        <EventForm serverDate={serverDate} />
+      </div>
+      <div className="flex flex-col gap-4">
+        {events.data.map(async (eventData) => {
+          const participants = await getParticipants(eventData.id);
+          const winners = await getWinners(eventData.id);
+          console.log(winners);
 
-        return (
-          <EventItem
-            key={eventData.id}
-            eventData={eventData}
-            participants={participants.data ?? []}
-          />
-        );
-      })}
+          return (
+            <EventItem
+              key={eventData.id}
+              eventData={eventData}
+              winners={winners.data}
+              participants={participants.data ?? []}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
