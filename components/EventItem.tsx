@@ -5,14 +5,14 @@ import { Event, Participant } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+import { motion } from "motion/react";
 
 import {
   AlertDialog,
@@ -33,8 +33,10 @@ import { format, isBefore, parseISO } from "date-fns";
 import WinnersForm from "./WinnersForm";
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash, X } from "lucide-react";
 import Image from "next/image";
+import { deleteParticipant } from "@/lib/actions/participant.action";
+import { Input } from "./ui/input";
 
 export default function EventItem({
   eventData,
@@ -53,6 +55,9 @@ export default function EventItem({
 }) {
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
+  const [open3, setOpen3] = useState(false);
+  const [participantsList, setParticipantsList] = useState(participants);
+  const [participantQuery, setParticipantQuery] = useState("");
   const router = useRouter();
 
   const handleUpdate = () => {
@@ -63,7 +68,7 @@ export default function EventItem({
 
   return (
     <div className="font-chakra border-white border-[1px] rounded-lg p-10">
-      <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between flex-wrap">
         <h2 className="text-2xl font-bold">{eventData.name}</h2>
 
         <div className="flex flex-row items-center gap-2 flex-wrap">
@@ -136,11 +141,11 @@ export default function EventItem({
         </div>
 
         <p>
-          {format(parseISO(eventData.startDate), "PPP")}
+          {format(parseISO(eventData.startDate), "PPP")}{" "}
           {format(parseISO(eventData.startDate), "p")} -{" "}
           {format(parseISO(eventData.endDate), "p")}
         </p>
-        <p className="w-1/2">{eventData.description}</p>
+        <p className="lg:w-1/2">{eventData.description}</p>
         <div className="">
           <h3 className="text-xl font-bold">Prizes</h3>
 
@@ -211,7 +216,7 @@ export default function EventItem({
                   {eventData.isCompleted ? "RESET" : "COMPLETE"}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="w-[95%] lg:max-w-4xl mx-auto">
                 <DialogHeader>
                   <DialogTitle>Add Winners</DialogTitle>
                   <DialogDescription>
@@ -223,13 +228,6 @@ export default function EventItem({
                   handleUpdate={handleUpdate}
                   participants={participants}
                 />
-                <DialogFooter className="sm:justify-start">
-                  <DialogClose asChild>
-                    <Button type="button" variant="secondary">
-                      Close
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}
@@ -249,6 +247,71 @@ export default function EventItem({
               {eventData.isActive ? "DEACTIVATE" : "ACTIVATE"}
             </Button>
           )}
+
+          <Dialog open={open3} onOpenChange={(value) => setOpen3(value)}>
+            <DialogTrigger asChild>
+              <Button variant="default">Participants</Button>
+            </DialogTrigger>
+            <DialogContent className="w-[95%] lg:max-w-4xl">
+              <DialogHeader className="flex flex-col gap-4">
+                <DialogTitle className="mb-4">Participants List</DialogTitle>
+                <Input
+                  className="font-chakra "
+                  value={participantQuery}
+                  placeholder="Search participant name"
+                  onChange={(event) => {
+                    setParticipantQuery(event.target.value);
+                    setParticipantsList(
+                      participants.filter((participant) => {
+                        return participant.name
+                          .toLowerCase()
+                          .includes(event.target.value.toLowerCase());
+                      })
+                    );
+                  }}
+                />
+              </DialogHeader>
+
+              <ul className="flex flex-col gap-4 overflow-y-auto max-h-80 pr-8">
+                {participantsList.length === 0 && (
+                  <p className="text-center">No participants found</p>
+                )}
+                {participantsList.map((participant) => (
+                  <motion.li
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    key={participant.id}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex flex-col gap-2 text-left">
+                      <p>{participant.name}</p>
+                      <p className="text-[#aaaaaa] text-sm">
+                        {participant.email}
+                      </p>
+                    </div>
+
+                    <div className="">
+                      <Button
+                        variant="ghost"
+                        onClick={async () => {
+                          deleteParticipant(participant.id);
+                          setParticipantsList((prev) => {
+                            return prev.filter(
+                              (item) => item.id !== participant.id
+                            );
+                          });
+                          router.refresh();
+                        }}
+                      >
+                        <X />
+                      </Button>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
