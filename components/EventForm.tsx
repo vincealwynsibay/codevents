@@ -33,11 +33,13 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FileInput from "./FileInput";
+import { useAuth } from "@clerk/nextjs";
 
 export default function EventForm({ serverDate }: { serverDate: Date }) {
   const [state, submitEvent, isPending] = useActionState(createEvent, {
     message: "",
   });
+  const { isSignedIn, userId } = useAuth();
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -66,7 +68,6 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
 
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);
-  console.log(form.getValues());
   return (
     <Dialog
       open={open}
@@ -89,7 +90,6 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
             ref={formRef}
             action={(data) => {
               form.trigger();
-              console.log("test1", data);
               if (!isValid) return;
               submitEvent(data);
 
@@ -298,7 +298,7 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
                 </Button>
               </DialogClose>
               <Button type="submit">
-                {isPending ? "Loading..." : "Create Novel"}
+                {isPending ? "Loading..." : "Create Event"}
               </Button>
             </DialogFooter>
           </form>

@@ -27,7 +27,6 @@ export default function FileInput({
   const [fileEnter, setFileEnter] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  console.log(value ? "n" : "y");
   return (
     <div
       onDragOver={(e) => {
@@ -49,7 +48,6 @@ export default function FileInput({
           const item = e.dataTransfer.items[0];
           if (item.kind === "file") {
             const file = item.getAsFile();
-            console.log(file);
             if (file) {
               if (fileInputRef.current) {
                 const dataTransfer = new DataTransfer();

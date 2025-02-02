@@ -101,7 +101,7 @@ export default function LatestEvent({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col-reverse  md:grid md:grid-cols-2 gap-4">
                 <div className="relative h-fit">
                   <ScrambleButton
                     className="py-8 w-full"
@@ -109,12 +109,9 @@ export default function LatestEvent({
                       if (!!ref.current) {
                         ref.current?.scrollIntoView({ behavior: "smooth" });
                       }
-                      console.log("click");
                     }}
                     delay={200}
-                    text={
-                      event.isCompleted ? "VIEW WINNERS" : "VIEW PARTICIPANTS"
-                    }
+                    text={event.isCompleted ? "VIEW WINNERS" : "REGISTER NOW"}
                   />
                   <Image
                     src="/svg/cursor.svg"
@@ -134,7 +131,7 @@ export default function LatestEvent({
               <div className="grid grid-cols-6 grid-rows-2">
                 <div className="text-center col-span col-start-1 col-end-3">
                   <Image
-                    src="/images/1st.jpg"
+                    src={event.prize1}
                     className="mx-auto w-auto h-[100px]"
                     alt="1st prize"
                     sizes="100vw"
@@ -143,12 +140,12 @@ export default function LatestEvent({
                   />
                   <p className="text-lg font-bold">1st Place</p>
                   <span className="text-sm text-[#aaaaaa]">
-                    Steelseries Apex 3 RGB Gaming Keyboard Whisper Quiet
+                    {event.prizeDescription1}
                   </span>
                 </div>
                 <div className="text-center col-start-5 col-end-7">
                   <Image
-                    src="/images/2nd.png"
+                    src={event.prize2}
                     className="mx-auto w-auto h-[100px]"
                     alt="1st prize"
                     sizes="100vw"
@@ -157,12 +154,12 @@ export default function LatestEvent({
                   />
                   <p className="text-lg font-bold">2nd Place</p>
                   <span className="text-sm text-[#aaaaaa]">
-                    Asus TUF H3 Gaming Headset
+                    {event.prizeDescription2}
                   </span>
                 </div>
                 <div className="text-center row-start-2 col-start-3 col-end-5 ">
                   <Image
-                    src="/images/3rd.png"
+                    src={event.prize3}
                     className="mx-auto w-auto h-[100px] border-[#b06e35]  "
                     alt="1st prize"
                     sizes="100vw"
@@ -171,7 +168,7 @@ export default function LatestEvent({
                   />
                   <p className="text-lg font-bold">3rd Place</p>
                   <span className="text-sm text-[#aaaaaa]">
-                    Logitech 0102 Carning Mouse
+                    {event.prizeDescription3}
                   </span>
                 </div>
               </div>

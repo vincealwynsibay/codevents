@@ -8,8 +8,8 @@ export const eventSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   status: z.string().nullable().default("UPCOMING"),
-  isActive: z.string().nullable().default("false"),
-  isCompleted: z.string().nullable().default("false"),
+  isActive: z.boolean().default(false),
+  isCompleted: z.boolean().default(false),
   winner1: z.string().nullable().default(""),
   winner2: z.string().nullable().default(""),
   winner3: z.string().nullable().default(""),
@@ -21,6 +21,10 @@ export const eventSchema = z.object({
   prizeDescription3: z.string().nonempty(),
 });
 
+export const userSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
 export const refinedEventSchema = eventSchema.refine(
   (data) =>
     isEqual(parseISO(data.endDate), parseISO(data.startDate)) ||
@@ -49,8 +53,13 @@ export const participantSchema = z.object({
   email: z
     .string()
     .email()
-    .refine((value) => value.trimEnd().split("@")[1] == "umindanao.edu.ph", {
-      message: "Email must be a valid umindanao.edu.ph",
-    }),
+    // validate this format v.sibay.139673.tc@umindanao.edu.ph
+    .refine(
+      (value) =>
+        /^[a-zA-Z]+\.[a-zA-Z]+\.\d{6}\.tc@umindanao\.edu\.ph$/.test(value),
+      {
+        message: "Email must be a valid umindanao.edu.ph",
+      }
+    ),
   eventId: z.string().nonempty(),
 });

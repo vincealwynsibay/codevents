@@ -30,6 +30,7 @@ import { z } from "zod";
 import { addWinners } from "@/lib/actions/event.action";
 import { Event, Participant } from "@/types/types";
 import { useForm } from "react-hook-form";
+import { DialogClose, DialogFooter } from "./ui/dialog";
 
 const winnersSchema = z
   .object({
@@ -38,13 +39,6 @@ const winnersSchema = z
     winner3: z.string().nullable(),
   })
   .refine((data) => {
-    console.log(
-      "test",
-      data,
-      data.winner1 && data.winner2 && data.winner1 === data.winner2,
-      data.winner1 && data.winner3 && data.winner1 === data.winner3,
-      data.winner2 && data.winner3 && data.winner2 === data.winner3
-    );
     return (
       (data.winner1 && data.winner2 && data.winner1 === data.winner2) ||
         (data.winner1 && data.winner3 && data.winner1 === data.winner3) ||
@@ -66,6 +60,7 @@ export default function WinnersForm({
   handleUpdate: () => void;
 }) {
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof winnersSchema>>({
     resolver: zodResolver(winnersSchema),
     defaultValues: {
@@ -84,12 +79,14 @@ export default function WinnersForm({
   const eventId = event.id;
 
   const onSubmit = async (data: z.infer<typeof winnersSchema>) => {
-    console.log(data);
+    setIsLoading(() => true);
     const res = await addWinners(eventId, data);
     if (!res.success) {
       setMessage(res.message);
+      setIsLoading(() => false);
       return;
     }
+    setIsLoading(() => false);
     setMessage("");
     handleUpdate();
   };
@@ -109,7 +106,7 @@ export default function WinnersForm({
                       variant="outline"
                       role="combobox"
                       className={cn(
-                        "w-[200px] justify-between",
+                        "w-full justify-between",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -122,7 +119,7 @@ export default function WinnersForm({
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
+                <PopoverContent className="w-full p-0">
                   <Command
                     filter={(value, search) => {
                       if (value.includes(search)) return 1;
@@ -204,7 +201,7 @@ export default function WinnersForm({
                       variant="outline"
                       role="combobox"
                       className={cn(
-                        "w-[200px] justify-between",
+                        "w-full justify-between",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -217,7 +214,7 @@ export default function WinnersForm({
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
+                <PopoverContent className="w-full p-0">
                   <Command
                     filter={(value, search) => {
                       if (value.includes(search)) return 1;
@@ -299,7 +296,7 @@ export default function WinnersForm({
                       variant="outline"
                       role="combobox"
                       className={cn(
-                        "w-[200px] justify-between",
+                        "w-full justify-between",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -312,7 +309,7 @@ export default function WinnersForm({
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
+                <PopoverContent className="w-full p-0">
                   <Command
                     filter={(value, search) => {
                       if (value.includes(search)) return 1;
@@ -382,15 +379,15 @@ export default function WinnersForm({
           )}
         />
         {message && <FormMessage>{message}</FormMessage>}
-        <Button
-          type="submit"
-          onClick={() => {
-            console.log(form.getValues());
-            console.log(form.formState.errors);
-          }}
-        >
-          Test
-        </Button>
+
+        <DialogFooter className="justify-end mt-4 flex flex-row items-center gap-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Close
+            </Button>
+          </DialogClose>
+          <Button type="submit">{isLoading ? "Loading..." : "Complete"}</Button>
+        </DialogFooter>
       </form>
     </Form>
   );

@@ -27,18 +27,6 @@ export default function ParticipantsList({
             <p>{participant.yearLevel} Year</p>
           </motion.li>
         ))}
-        {participants.map((participant) => (
-          <motion.li
-            key={participant.id + "1"}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="flex items-center justify-between"
-          >
-            <p>{participant.name}</p>
-            <p>{participant.yearLevel} Year</p>
-          </motion.li>
-        ))}
       </ul>
     </div>
   );

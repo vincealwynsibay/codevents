@@ -4,13 +4,11 @@ import LatestEvent from "@/components/LatestEvent";
 
 export default async function Home() {
   const event = await getLatestActiveEvent();
-  console.log(event);
   if (!event.data) return null;
   const participants = await getParticipants(event.data.id);
   if (!participants.data) return null;
 
   const winners = await getWinners(event.data.id);
-  console.log(winners);
   // if (!participants.data) return null;
   // if (!winners.data) return null;
 

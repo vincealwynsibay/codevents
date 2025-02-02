@@ -11,6 +11,10 @@ export type Event = {
   id: string;
 } & EventPayload;
 
+export type APIResponse<T = object> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
 export type Participant = {
   id: string;
   name: string;

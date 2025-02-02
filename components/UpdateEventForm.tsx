@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +21,8 @@ import { parseISO } from "date-fns";
 import { Button } from "./ui/button";
 import { Event } from "@/types/types";
 import { updateEvent } from "@/lib/actions/event.action";
+import FileInput from "./FileInput";
+import { DialogClose, DialogFooter } from "./ui/dialog";
 
 export default function UpdateEventForm({
   eventData,
@@ -60,113 +61,230 @@ export default function UpdateEventForm({
   return (
     <Form {...form}>
       <form
-        className="gap-8"
+        className="gap-8 overflow-y-auto"
         ref={formRef}
         action={(data) => {
-          console.log("data", data, form.getValues());
           form.trigger();
           if (!isValid) return;
           submitEvent(data);
           handleUpdate();
         }}
       >
+        <div className="flex flex-col gap-2 overflow-y-scroll md:grid md:grid-cols-2 md:gap-8">
+          <div className="flex flex-col gap-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="hackathon2025" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="hackathon2025" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <div className="">
+                      <DateTimePicker
+                        value={parseISO(value)}
+                        onChange={(date) =>
+                          date && onChange(date?.toISOString())
+                        }
+                        {...fieldProps}
+                      />
+                      <Input type="hidden" value={value} {...fieldProps} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="endDate"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                  <FormLabel>End Date</FormLabel>
+                  <FormControl>
+                    <div className="">
+                      <DateTimePicker
+                        value={parseISO(value)}
+                        onChange={(date) =>
+                          date && onChange(date?.toISOString())
+                        }
+                        {...fieldProps}
+                      />
+                      <Input type="hidden" value={value} {...fieldProps} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-2 w-full">
+            <FormLabel>Prize 1</FormLabel>
+            <div className="grid grid-cols-[100px_1fr] lg:pr-4 gap-4 w-full">
+              <FormField
+                control={form.control}
+                name="prize1"
+                render={({
+                  field: { value, onChange, ref, ...fieldProps },
+                }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FileInput
+                        className=" mx-0 aspect-square"
+                        value={value}
+                        onChange={onChange}
+                        ref={ref}
+                        fieldProps={fieldProps}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="prizeDescription1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        className="h-full w-full"
+                        {...field}
+                        placeholder="Enter Prize 1 Description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormLabel>Prize 2</FormLabel>
+            <div className="grid grid-cols-[100px_1fr] lg:pr-4 gap-4 w-full">
+              <FormField
+                control={form.control}
+                name="prize2"
+                render={({
+                  field: { value, onChange, ref, ...fieldProps },
+                }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FileInput
+                        className=" mx-0 aspect-square"
+                        value={value}
+                        onChange={onChange}
+                        ref={ref}
+                        fieldProps={fieldProps}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="prizeDescription2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        className="h-full w-full"
+                        {...field}
+                        placeholder="Enter Prize 2 Description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormLabel>Prize 3</FormLabel>
+            <div className="grid grid-cols-[100px_1fr] lg:pr-4 gap-4 w-full">
+              <FormField
+                control={form.control}
+                name="prize3"
+                render={({
+                  field: { value, onChange, ref, ...fieldProps },
+                }) => (
+                  <FormItem>
+                    <FormControl>
+                      <FileInput
+                        className=" mx-0 aspect-square"
+                        value={value}
+                        onChange={onChange}
+                        ref={ref}
+                        fieldProps={fieldProps}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="prizeDescription3"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea
+                        className="h-full w-full flex-1 grow"
+                        {...field}
+                        placeholder="Enter Prize 3 Description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </div>
         <FormField
           control={form.control}
           name="id"
-          render={({ field: { value, ...fieldProps } }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  type="hidden"
-                  value={value ?? eventData.id}
-                  {...fieldProps}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder="hackathon2025" {...field} />
+                <Input type="hidden" {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Textarea placeholder="hackathon2025" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="startDate"
-          render={({ field: { value, onChange, ...fieldProps } }) => (
-            <FormItem>
-              <FormLabel>Start Datetime</FormLabel>
-              <FormControl>
-                <div className="">
-                  <DateTimePicker
-                    value={parseISO(value)}
-                    onChange={(date) => date && onChange(date?.toISOString())}
-                    {...fieldProps}
-                  />
-                  <Input type="hidden" value={value} {...fieldProps} />
-                </div>
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="endDate"
-          render={({ field: { value, onChange, ...fieldProps } }) => (
-            <FormItem>
-              <FormLabel>End Datetime</FormLabel>
-              <FormControl>
-                <div className="">
-                  <DateTimePicker
-                    value={parseISO(value)}
-                    onChange={(date) => date && onChange(date?.toISOString())}
-                    {...fieldProps}
-                  />
-                  <Input type="hidden" value={value} {...fieldProps} />
-                </div>
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         {state.message && <FormMessage>{state.message}</FormMessage>}
-        <Button type="submit">
-          {isPending ? "Loading..." : "Update Novel"}
-        </Button>
+        <DialogFooter className="sm:justify-end mt-4  flex flex-row items-center gap-4">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Close
+            </Button>
+          </DialogClose>
+          <Button type="submit">{isPending ? "Loading..." : "Event"}</Button>
+        </DialogFooter>
       </form>
     </Form>
   );
