@@ -33,13 +33,11 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FileInput from "./FileInput";
-import { useAuth } from "@clerk/nextjs";
 
 export default function EventForm({ serverDate }: { serverDate: Date }) {
   const [state, submitEvent, isPending] = useActionState(createEvent, {
     message: "",
   });
-  const { isSignedIn, userId } = useAuth();
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
@@ -64,7 +62,7 @@ export default function EventForm({ serverDate }: { serverDate: Date }) {
       setOpen(false);
       form.reset();
     }
-  }, [state]);
+  }, [form, state]);
 
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);

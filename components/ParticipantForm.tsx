@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
 import { addParticipant } from "@/lib/actions/participant.action";
 import { Participant } from "@/types/types";
 
@@ -38,8 +37,6 @@ export default function ParticipantForm({
   const [state, submitParticipant, isPending] = useActionState(addParticipant, {
     message: "",
   });
-
-  const router = useRouter();
 
   const form = useForm<z.output<typeof participantSchema>>({
     resolver: zodResolver(participantSchema),
@@ -60,7 +57,7 @@ export default function ParticipantForm({
         yearLevel: form.getValues()["yearLevel"],
       });
     }
-  }, [state.success]);
+  }, [eventId, form, handleAddParticipant, state.success]);
 
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);
