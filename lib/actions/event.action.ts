@@ -16,8 +16,13 @@ import {
 } from "firebase/firestore";
 import { isBefore, parseISO } from "date-fns";
 
+import { auth } from "@clerk/nextjs/server";
 // get events with sort and filter as parameter
 export async function getEvents() {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   // get events
   const events = await getDocs(collection(db, "events"));
 
@@ -33,7 +38,6 @@ export async function getLatestActiveEvent() {
   const q = query(collection(db, "events"), where("isActive", "==", true));
 
   const events = await getDocs(q);
-  console.log();
   // sort events based on name
   const sortedEvents = events.docs.sort((a, b) => {
     return isBefore(parseISO(a.data().startDate), parseISO(b.data().startDate))
@@ -53,6 +57,10 @@ export async function getLatestActiveEvent() {
 }
 
 export async function getPublishedEvents() {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   // get events
   // get only events with isActive is true
   const q = query(collection(db, "events"), where("isActive", "==", true));
@@ -72,7 +80,10 @@ export async function createEvent(
   formData: FormData
 ): Promise<FormState> {
   try {
-    console.log("test2", formData);
+    const { userId } = await auth();
+    if (!userId) {
+      return { message: "You must be signed in to perform this action." };
+    }
     const validatedFields = eventSchema.safeParse({
       name: formData.get("name"),
       description: formData.get("description"),
@@ -87,9 +98,7 @@ export async function createEvent(
       prizeDescription3: formData.get("prizeDescription3"),
     });
 
-    console.log("test3", validatedFields);
     if (!validatedFields.success) {
-      console.log(validatedFields.error);
       return {
         message: "Validation failed",
         fields: validatedFields.data,
@@ -126,6 +135,10 @@ export async function updateEvent(
   // update event
 
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { message: "You must be signed in to perform this action." };
+    }
     const validatedFields = eventSchema
       .partial()
       .extend({
@@ -147,7 +160,6 @@ export async function updateEvent(
       });
 
     if (!validatedFields.success) {
-      console.log(formData, validatedFields.error);
       return {
         message: "Validation failed",
         fields: validatedFields.data,
@@ -172,6 +184,10 @@ export async function updateEvent(
 // delete event
 
 export async function deleteEvent(eventId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   try {
     const event = doc(db, "events", eventId);
 
@@ -188,6 +204,10 @@ export async function deleteEvent(eventId: string) {
 }
 
 export async function openEvent(eventId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   try {
     const event = doc(db, "events", eventId);
 
@@ -204,6 +224,10 @@ export async function openEvent(eventId: string) {
 }
 
 export async function closeEvent(eventId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   try {
     const event = doc(db, "events", eventId);
 
@@ -220,6 +244,10 @@ export async function closeEvent(eventId: string) {
 }
 
 export async function completeEvent(eventId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   try {
     const event = doc(db, "events", eventId);
 
@@ -237,6 +265,10 @@ export async function completeEvent(eventId: string) {
 }
 
 export async function resetEvent(eventId: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
   try {
     const event = doc(db, "events", eventId);
 
@@ -261,6 +293,10 @@ export async function addWinners(
   }
 ) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { message: "You must be signed in to perform this action." };
+    }
     const event = doc(db, "events", eventId);
 
     if (!event) {
@@ -331,8 +367,6 @@ export async function getWinners(eventId: string) {
       (participants.find(
         (p) => p.id === parsedEventData.winner3
       ) as Participant) ?? null;
-
-    console.log(winner1, winner2, winner3);
 
     return {
       data: {

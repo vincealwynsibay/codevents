@@ -2,15 +2,23 @@
 
 import { FormState, Participant } from "@/types/types";
 import { participantSchema } from "../validation";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase/clientApp";
+import { auth } from "@clerk/nextjs/server";
 
 export async function addParticipant(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   try {
-    console.log(formData);
     const validatedFields = participantSchema.safeParse({
       name: formData.get("name"),
       email: formData.get("email"),
@@ -18,7 +26,6 @@ export async function addParticipant(
     });
 
     if (!validatedFields.success) {
-      console.log(validatedFields.error);
       return {
         message: "Validation failed",
         fields: validatedFields.data,
@@ -36,6 +43,21 @@ export async function addParticipant(
     if (participants.docs.length > 0) {
       return {
         message: "Email is already registered",
+        success: false,
+      };
+    }
+
+    // check if name is already registered
+    const q2 = query(
+      collection(db, "participants"),
+      where("name", "==", validatedFields.data.name)
+    );
+
+    const participants2 = await getDocs(q2);
+
+    if (participants2.docs.length > 0) {
+      return {
+        message: "Name is already registered",
         success: false,
       };
     }
@@ -73,4 +95,15 @@ export async function getParticipants(eventId: string) {
       return { ...(doc.data() as Participant), id: doc.id };
     }),
   };
+}
+
+export async function deleteParticipant(id: string) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { message: "You must be signed in to perform this action." };
+  }
+
+  await deleteDoc(doc(db, "participants", id));
+
+  return { message: "Participant deleted successfully" };
 }
