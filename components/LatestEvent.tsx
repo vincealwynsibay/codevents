@@ -33,7 +33,6 @@ export default function LatestEvent({
   const [displayText, setDisplayText] = useState(event.name);
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-
   useEffect(() => {
     let iterations = 0;
     const originalText = event.name;
@@ -62,15 +61,15 @@ export default function LatestEvent({
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div
-        ref={scrollRef}
-        className="font-chakra mx-8 border-white border-[1px] rounded-lg p-10 font-primary"
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ once: true }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true }}
+        <div
+          ref={scrollRef}
+          className="font-chakra mx-8 border-white border-[1px] rounded-lg p-10 font-primary"
         >
           <div className="mx-auto bg-card rounded-lg px-10 py-2 w-fit text-[20px]">
             {event.isCompleted ? (
@@ -175,8 +174,8 @@ export default function LatestEvent({
               </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
 
       <div className="" ref={scrollRef}>
         <motion.div

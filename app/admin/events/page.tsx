@@ -4,6 +4,19 @@ import EventForm from "@/components/EventForm";
 import EventItem from "@/components/EventItem";
 import { getEvents, getWinners } from "@/lib/actions/event.action";
 import { getParticipants } from "@/lib/actions/participant.action";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "admin codevents",
+  description: "| UMTC Hackathon Events",
+  icons: {
+    icon: [
+      {
+        url: "/favicon.ico",
+      },
+    ],
+  },
+};
 
 export default async function Page() {
   const events = await getEvents();

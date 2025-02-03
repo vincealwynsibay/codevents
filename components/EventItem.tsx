@@ -208,7 +208,7 @@ export default function EventItem({
           </div>
         )}
 
-        <div className="flex flex-row mx-auto lg:mx-0 items-center justify-end gap-4">
+        <div className="flex flex-row mx-auto lg:mx-0 flex-wrap items-center justify-end gap-4">
           {eventData.isActive && (
             <Dialog open={open} onOpenChange={(value) => setOpen(value)}>
               <DialogTrigger asChild>

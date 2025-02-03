@@ -26,6 +26,8 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { addParticipant } from "@/lib/actions/participant.action";
 import { Participant } from "@/types/types";
+import { useToast } from "@/hooks/use-toast";
+import { CircleCheckIcon } from "lucide-react";
 
 export default function ParticipantForm({
   eventId,
@@ -47,6 +49,7 @@ export default function ParticipantForm({
     },
   });
 
+  const { toast } = useToast();
   useEffect(() => {
     if (state.success) {
       handleAddParticipant({
@@ -56,8 +59,21 @@ export default function ParticipantForm({
         eventId: eventId,
         yearLevel: form.getValues()["yearLevel"],
       });
+
+      toast({
+        description: (
+          <div className="flex items-center gap-2">
+            <span>
+              <CircleCheckIcon className="h-5 w-5 text-green-500 inline" />
+            </span>
+            <span className="">Participant registered successfully.</span>
+          </div>
+        ),
+      });
+
+      form.reset();
     }
-  }, [eventId, form, handleAddParticipant, state.success]);
+  }, [eventId, form, handleAddParticipant, state.success, toast]);
 
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);
@@ -149,7 +165,9 @@ export default function ParticipantForm({
             )}
           />
 
-          {state.message && <FormMessage>{state.message}</FormMessage>}
+          {state.message && !state.success && (
+            <FormMessage>{state.message}</FormMessage>
+          )}
           <Button type="submit">{isPending ? "Loading..." : "Register"}</Button>
         </form>
       </Form>
