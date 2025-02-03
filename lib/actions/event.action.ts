@@ -41,8 +41,8 @@ export async function getLatestActiveEvent() {
   // sort events based on name
   const sortedEvents = events.docs.sort((a, b) => {
     return isBefore(parseISO(a.data().startDate), parseISO(b.data().startDate))
-      ? 1
-      : -1;
+      ? -1
+      : 1;
   });
 
   return {

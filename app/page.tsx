@@ -1,7 +1,7 @@
 import { getLatestActiveEvent, getWinners } from "@/lib/actions/event.action";
 import { getParticipants } from "@/lib/actions/participant.action";
 import LatestEvent from "@/components/LatestEvent";
-
+export const dynamic = "force-dynamic";
 export default async function Home() {
   const event = await getLatestActiveEvent();
   if (!event.data) return null;

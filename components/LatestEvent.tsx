@@ -33,6 +33,7 @@ export default function LatestEvent({
   const [displayText, setDisplayText] = useState(event.name);
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+
   useEffect(() => {
     let iterations = 0;
     const originalText = event.name;

@@ -1,6 +1,6 @@
 "use client";
 
-import { RefObject, useState } from "react";
+import { RefObject, useCallback, useState } from "react";
 import ParticipantForm from "./ParticipantForm";
 import ParticipantsList from "./ParticipantsList";
 import { Participant } from "@/types/types";
@@ -16,12 +16,12 @@ export default function EventParticipants({
 }) {
   const [participants, setParticipants] = useState(participantsList);
 
-  const handleAddParticipant = (newParticipant: Participant) => {
+  const handleAddParticipant = useCallback((newParticipant: Participant) => {
     setParticipants((prev) => [
       { ...newParticipant, id: newParticipant.email },
       ...prev,
     ]);
-  };
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto mt-8">
