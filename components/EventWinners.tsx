@@ -19,7 +19,7 @@ export default function EventWinners({
   return (
     <div className="mt-8">
       <div
-        className="flex flex-col gap-4 mx-8 font-chakra rounded-lg border-white border-[1px] p-8 "
+        className="flex flex-col gap-4 mx-8 font-chakra rounded-lg border-white border-[1px] p-10 "
         ref={ref}
       >
         <h2 className="text-2xl">WINNERS</h2>

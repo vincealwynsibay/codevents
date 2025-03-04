@@ -79,7 +79,7 @@ export default function ParticipantForm({
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <div className="rounded-lg border-white border-[1px] p-8 font-primary flex flex-col gap-4">
+    <div className="rounded-lg border-white border-[1px] p-10 font-primary flex flex-col gap-4">
       <h2 className="text-3xl">REGISTER NOW</h2>
       <Form {...form}>
         <form

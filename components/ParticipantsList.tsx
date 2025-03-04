@@ -10,11 +10,11 @@ export default function ParticipantsList({
   return (
     <div
       id="participantForm"
-      className="rounded-lg border-white border-[1px] p-8 font-primary flex flex-col gap-4"
+      className="rounded-lg border-white border-[1px] p-10 font-primary flex flex-col gap-4"
     >
       {/* list of participants */}
       <h2 className="text-3xl">PARTICIPANTS</h2>
-      <ul className="flex flex-col gap-4 overflow-y-auto max-h-80 pr-8">
+      <ul className="flex flex-col gap-4 overflow-y-auto max-h-80 ">
         {participants.map((participant) => (
           <motion.li
             key={participant.id}
@@ -24,7 +24,7 @@ export default function ParticipantsList({
             className="flex items-center justify-between"
           >
             <p>{participant.name}</p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-end gap-1 ">
               <p>{participant.yearLevel} Year </p>
               <p>{participant.course}</p>
             </div>

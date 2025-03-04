@@ -67,7 +67,7 @@ export default function EventItem({
   };
 
   return (
-    <div className="font-chakra border-white border-[1px] rounded-lg p-8">
+    <div className="font-chakra border-white border-[1px] rounded-lg p-10">
       <div className="flex flex-row items-center justify-between flex-wrap">
         <h2 className="text-2xl font-bold">{eventData.name}</h2>
 
@@ -296,7 +296,6 @@ export default function EventItem({
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost">
                             <X />
-                            asda
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>

@@ -69,7 +69,7 @@ export default function LatestEvent({
       >
         <div
           ref={scrollRef}
-          className="font-chakra mx-8 border-white border-[1px] rounded-lg p-8 font-primary"
+          className="font-chakra mx-8 border-white border-[1px] rounded-lg p-10 font-primary"
         >
           <div className="mx-auto bg-card rounded-lg px-10 py-2 w-fit text-[20px]">
             {event.isCompleted ? (
