@@ -67,7 +67,7 @@ export default function EventItem({
   };
 
   return (
-    <div className="font-chakra border-white border-[1px] rounded-lg p-10">
+    <div className="font-chakra border-white border-[1px] rounded-lg p-8">
       <div className="flex flex-row items-center justify-between flex-wrap">
         <h2 className="text-2xl font-bold">{eventData.name}</h2>
 
@@ -292,7 +292,42 @@ export default function EventItem({
                     </div>
 
                     <div className="">
-                      <Button
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost">
+                            <X />
+                            asda
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete the participant.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={async () => {
+                                deleteParticipant(participant.id);
+                                setParticipantsList((prev) => {
+                                  return prev.filter(
+                                    (item) => item.id !== participant.id
+                                  );
+                                });
+                                router.refresh();
+                              }}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      {/* <Button
                         variant="ghost"
                         onClick={async () => {
                           deleteParticipant(participant.id);
@@ -305,7 +340,7 @@ export default function EventItem({
                         }}
                       >
                         <X />
-                      </Button>
+                      </Button> */}
                     </div>
                   </motion.li>
                 ))}

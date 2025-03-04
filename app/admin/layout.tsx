@@ -8,6 +8,8 @@ export default async function RootLayout({
 }>) {
   const { userId } = await auth();
 
+  console.log(userId);
+
   if (!userId) {
     redirect("/");
   }
