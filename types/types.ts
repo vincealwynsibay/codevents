@@ -22,4 +22,5 @@ export type Participant = {
   eventId: string;
   yearLevel: string;
   course: string;
+  createdAt?: string;
 };

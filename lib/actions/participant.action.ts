@@ -8,6 +8,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  orderBy,
   query,
   where,
 } from "firebase/firestore";
@@ -64,10 +65,10 @@ export async function addParticipant(
       };
     }
 
-    const newParticipant = await addDoc(
-      collection(db, "participants"),
-      validatedFields.data
-    );
+    const newParticipant = await addDoc(collection(db, "participants"), {
+      ...validatedFields.data,
+      createdAt: new Date().toISOString(),
+    });
 
     if (!newParticipant) {
       return {
@@ -88,7 +89,8 @@ export async function addParticipant(
 export async function getParticipants(eventId: string) {
   const q = query(
     collection(db, "participants"),
-    where("eventId", "==", eventId)
+    where("eventId", "==", eventId),
+    orderBy("createdAt", "desc")
   );
   const participants = await getDocs(q);
 
