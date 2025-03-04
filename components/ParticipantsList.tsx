@@ -10,7 +10,7 @@ export default function ParticipantsList({
   return (
     <div
       id="participantForm"
-      className="rounded-lg border-white border-[1px] p-10 font-primary flex flex-col gap-4"
+      className="rounded-lg border-white border-[1px] p-8 font-primary flex flex-col gap-4"
     >
       {/* list of participants */}
       <h2 className="text-3xl">PARTICIPANTS</h2>
@@ -24,7 +24,10 @@ export default function ParticipantsList({
             className="flex items-center justify-between"
           >
             <p>{participant.name}</p>
-            <p>{participant.yearLevel} Year</p>
+            <div className="flex items-center gap-1">
+              <p>{participant.yearLevel} Year </p>
+              <p>{participant.course}</p>
+            </div>
           </motion.li>
         ))}
       </ul>

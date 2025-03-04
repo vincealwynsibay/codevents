@@ -21,4 +21,5 @@ export type Participant = {
   email: string;
   eventId: string;
   yearLevel: string;
+  course: string;
 };

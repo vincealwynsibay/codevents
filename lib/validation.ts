@@ -63,4 +63,5 @@ export const participantSchema = z.object({
     ),
   eventId: z.string().nonempty(),
   yearLevel: z.string().nonempty(),
+  course: z.string().nonempty(),
 });

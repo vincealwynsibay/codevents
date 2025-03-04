@@ -58,6 +58,7 @@ export default function ParticipantForm({
         email: form.getValues()["email"],
         eventId: eventId,
         yearLevel: form.getValues()["yearLevel"],
+        course: form.getValues()["course"],
       });
 
       toast({
@@ -78,7 +79,7 @@ export default function ParticipantForm({
   const isValid = form.formState.isValid;
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <div className="rounded-lg border-white border-[1px] p-10 font-primary flex flex-col gap-4">
+    <div className="rounded-lg border-white border-[1px] p-8 font-primary flex flex-col gap-4">
       <h2 className="text-3xl">REGISTER NOW</h2>
       <Form {...form}>
         <form
@@ -119,6 +120,37 @@ export default function ParticipantForm({
                 <FormDescription>
                   Use a valid umindanao.edu.ph email
                 </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="course"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course</FormLabel>
+                <FormControl>
+                  <div className="">
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      {...field}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Course" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="IT">
+                          BS in Information Technology
+                        </SelectItem>
+                        <SelectItem value="CS">
+                          BS in Computer Science
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

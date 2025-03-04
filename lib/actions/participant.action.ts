@@ -24,6 +24,7 @@ export async function addParticipant(
       email: formData.get("email"),
       eventId: formData.get("eventId"),
       yearLevel: formData.get("yearLevel"),
+      course: formData.get("course"),
     });
 
     if (!validatedFields.success) {
