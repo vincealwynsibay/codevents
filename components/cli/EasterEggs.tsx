@@ -165,17 +165,8 @@ export default function EasterEggs() {
               <path d="M16 4l3 7 8-2-5 6 6 5-8 0-2 8-3-7-6 4 2-8-7-3 7-3-2-7z" fill="#22c55e" fillOpacity="0.7" />
             </svg>
           ) : (
-            <svg viewBox="0 0 32 32" className="size-8 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]">
-              <g stroke="#1f2937" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M10 12l-5-3M10 17H4M10 22l-5 3M22 12l5-3M22 17h6M22 22l5 3M13 6l-2-3M19 6l2-3" />
-              </g>
-              <ellipse cx="16" cy="18" rx="7" ry="9" fill="#ef4444" />
-              <circle cx="16" cy="8" r="4" fill="#1f2937" />
-              <path d="M16 9v18" stroke="#7f1d1d" strokeWidth="1.2" />
-              <circle cx="13" cy="15" r="1.5" fill="#1f2937" />
-              <circle cx="19" cy="20" r="1.5" fill="#1f2937" />
-              <circle cx="13" cy="22" r="1.2" fill="#1f2937" />
-            </svg>
+            // Pixel sprite generated with agent-sprite-forge (Codex image route), 4-frame crawl.
+            <span className="bug-sprite block size-8 drop-shadow-[0_0_6px_rgba(239,68,68,0.55)]" />
           )}
         </button>
       ))}

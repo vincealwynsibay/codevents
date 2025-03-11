@@ -230,6 +230,17 @@
     30%, 50%, 70% { transform: translateX(-8px); }
     40%, 60% { transform: translateX(8px); }
   }
+  /* 4-frame pixel bug crawl (public/images/sprites/bug-crawl.png, 512x128 strip) */
+  .bug-sprite {
+    background: url("/images/sprites/bug-crawl.png") 0 0 / 128px 32px no-repeat;
+    image-rendering: pixelated;
+    animation: bugcrawl 0.45s steps(4) infinite;
+  }
+  @keyframes bugcrawl {
+    to {
+      background-position: -128px 0;
+    }
+  }
   .blink {
     animation: blink 1.1s steps(1) infinite;
   }
