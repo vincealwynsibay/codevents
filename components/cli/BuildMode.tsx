@@ -8,7 +8,8 @@ import { breakBlock as breakBlockAction, placeBlock } from "@/lib/actions/builds
 import { cn } from "@/lib/utils";
 
 /*
-  Shared build mode (desktop): everyone sees the same blocks on the same page, live.
+  Shared build mode, a hidden easter egg: off until you run `build` in the shell.
+  Everyone sees the same blocks on the same page, live.
   - Click empty space or plain text to drop a block. Links, buttons, inputs, cards
     and the shell keep their normal behaviour. Click a block to stack on it.
   - Right-click your own block to break it (officers can break any).
@@ -74,20 +75,20 @@ export default function BuildMode() {
     window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 3200);
   };
 
-  // ---- on by default on desktop; remembers if you switched it off ----
+  // ---- hidden easter egg: off until you run `build` in the shell; remembered per browser ----
   useEffect(() => {
-    let off = false;
+    let on = false;
     try {
-      off = localStorage.getItem("codevents:build:off") === "1";
-      if (!off && !localStorage.getItem("codevents:build:tip")) setTip(true);
+      on = localStorage.getItem("codevents:build:on") === "1";
     } catch {}
-    setEnabled(!off && window.matchMedia("(pointer: fine)").matches);
+    setEnabled(on);
     const toggle = (e: Event) => {
       const want = (e as CustomEvent).detail?.on;
       setEnabled((v) => {
         const next = typeof want === "boolean" ? want : !v;
         try {
-          localStorage.setItem("codevents:build:off", next ? "0" : "1");
+          localStorage.setItem("codevents:build:on", next ? "1" : "0");
+          if (next && !localStorage.getItem("codevents:build:tip")) setTip(true);
         } catch {}
         return next;
       });
@@ -202,7 +203,7 @@ export default function BuildMode() {
         draft.offX = from.x - SIZE / 2 - to.x;
         draft.offY = from.y - SIZE / 2 - to.y;
         const dist = Math.hypot(draft.offX, draft.offY);
-        draft.fallMs = Math.round(Math.min(900, Math.max(160, Math.sqrt(dist) * 32)));
+        draft.fallMs = Math.round(Math.min(900, Math.max(260, Math.sqrt(dist) * 32)));
       }
       setPending((p) => [...p, draft]);
       const res = await placeBlock({ page: pathname, anchor: land.anchor, dx: land.dx, type: typeRef.current });
@@ -324,50 +325,41 @@ export default function BuildMode() {
         })}
       </div>
 
-      {/* corner palette */}
-      <div data-build-ui className="no-print fixed bottom-4 left-4 z-[57] hidden items-center gap-1 rounded-xl border border-white/10 bg-black/75 p-1.5 shadow-xl backdrop-blur [@media(pointer:fine)]:flex">
-        {enabled ? (
-          <>
-            {TYPES.map((t, i) => (
-              <button
-                key={t.id}
-                onClick={() => setType(t.id)}
-                title={`${i + 1} · ${t.label}`}
-                aria-label={`Block colour: ${t.label}`}
-                className={cn("size-6 rounded-md p-1 transition-all", type === t.id ? "bg-white/15 ring-1 ring-white/60" : "hover:bg-white/10")}
-              >
-                <span className={cn("block size-full rounded-[3px]", t.cls)} />
-              </button>
-            ))}
-            <span className="px-1.5 font-mono text-[10px] tabular-nums text-neutral-500" title="Blocks on this page, from everyone">
-              {remote.length} here
-            </span>
-            <span className="flex items-center gap-1 px-1 font-mono text-[10px] text-emerald-400/80" title="Shared: everyone sees these, live">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-400" /> live
-            </span>
+      {/* corner palette: only while building */}
+      {enabled && (
+        <div data-build-ui className="no-print fixed bottom-4 left-4 z-[57] flex items-center gap-1 rounded-xl border border-white/10 bg-black/75 p-1.5 shadow-xl backdrop-blur">
+          {TYPES.map((t, i) => (
             <button
-              onClick={() => window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: false } }))}
-              className="rounded px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 hover:text-neutral-200"
-              title="Stop building (you'll still see blocks)"
+              key={t.id}
+              onClick={() => setType(t.id)}
+              title={`${i + 1} · ${t.label}`}
+              aria-label={`Block colour: ${t.label}`}
+              className={cn("size-6 rounded-md p-1 transition-all", type === t.id ? "bg-white/15 ring-1 ring-white/60" : "hover:bg-white/10")}
             >
-              off
+              <span className={cn("block size-full rounded-[3px]", t.cls)} />
             </button>
-          </>
-        ) : (
+          ))}
+          <span className="px-1.5 font-mono text-[10px] tabular-nums text-neutral-500" title="Blocks on this page, from everyone">
+            {remote.length} here
+          </span>
+          <span className="flex items-center gap-1 px-1 font-mono text-[10px] text-emerald-400/80" title="Shared: everyone sees these, live">
+            <span className="size-1.5 animate-pulse rounded-full bg-emerald-400" /> live
+          </span>
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: true } }))}
-            className="flex items-center gap-1.5 rounded px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 hover:text-neutral-200"
+            onClick={() => window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: false } }))}
+            className="rounded px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 hover:text-neutral-200"
+            title="Stop building (you'll still see blocks). `build` in the shell turns it back on."
           >
-            <span className="size-2.5 rounded-[2px] bg-[#2a4aff]" /> build
+            off
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {enabled && (toast || tip) && (
-        <div data-build-ui className="no-print fixed bottom-16 left-4 z-[57] hidden max-w-[280px] rounded-lg border border-white/10 bg-black/85 px-3 py-2 font-mono text-[11px] text-neutral-300 shadow-xl backdrop-blur [@media(pointer:fine)]:block">
+        <div data-build-ui className="no-print fixed bottom-16 left-4 z-[57] max-w-[280px] rounded-lg border border-white/10 bg-black/85 px-3 py-2 font-mono text-[11px] text-neutral-300 shadow-xl backdrop-blur">
           {toast ?? (
             <>
-              psst: click any empty space to drop a block. everyone sees them, live. right-click yours to break it. no sign-in needed.
+              you found build mode. click any empty space to drop a block; everyone sees them, live. right-click yours to break it. `build off` to stop.
               <button onClick={dismissTip} className="ml-2 text-neutral-500 hover:text-white">
                 got it
               </button>

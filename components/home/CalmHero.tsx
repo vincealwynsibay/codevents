@@ -61,9 +61,6 @@ export default function CalmHero({
                   ▶ {open ? "PRESS START" : "SEE EVENTS"}
                 </Link>
                 <OpenShellButton />
-                <span className="text-xs text-neutral-500">
-                  try <span className="text-neutral-300">build</span> in the shell
-                </span>
               </div>
             </div>
             <HeroTerminal rows={rows} className={wide ? "max-w-none text-[13.5px]" : undefined} maxRows={wide ? 6 : 4} />
