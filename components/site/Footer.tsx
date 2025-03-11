@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="no-print relative mt-28 overflow-hidden border-t border-white/[0.06]">
+    <footer data-anchor="footer" className="no-print relative mt-28 overflow-hidden border-t border-white/[0.06]">
       <div className="glow-line absolute inset-x-0 top-0 opacity-40" />
       <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6">

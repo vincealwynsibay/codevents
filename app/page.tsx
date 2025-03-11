@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           <div className="absolute right-6 top-14 hidden lg:block xl:right-10">
             <HeroTicket event={featured} />
           </div>
-          <h1 className=" max-w-4xl font-chakra text-5xl font-bold uppercase leading-[0.92] tracking-tight sm:text-7xl">
+          <h1 data-anchor="hero-title" className=" max-w-4xl font-chakra text-5xl font-bold uppercase leading-[0.92] tracking-tight sm:text-7xl">
             <span className="text-gradient">Build. Learn.</span>
             <br />
             <span className="highlight text-white">Compete.</span>

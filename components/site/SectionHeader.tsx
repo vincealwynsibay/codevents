@@ -14,7 +14,7 @@ export default function SectionHeader({
   linkLabel?: string;
 }) {
   return (
-    <div className="mb-6 flex items-center gap-4">
+    <div data-anchor={`section-${index}`} className="mb-6 flex items-center gap-4">
       <span className="font-chakra text-xs font-semibold tracking-[0.2em] text-blue-300/80">{index}</span>
       <h2 className="font-chakra text-2xl font-bold uppercase tracking-wide">{title}</h2>
       <span className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />

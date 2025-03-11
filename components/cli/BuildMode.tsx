@@ -2,20 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { clientDb } from "@/lib/client/firestore";
+import { breakBlock as breakBlockAction, placeBlock } from "@/lib/actions/builds";
 import { cn } from "@/lib/utils";
 
 /*
-  Build mode, always on (desktop).
-  Click empty space or plain text to drop a block; it falls until it lands on a
-  heading, text, a card, a button, the shell window, another block or the page
-  bottom. Links, buttons, inputs and cards keep working normally. Right-click a
-  block to break it. Three colours, 80 blocks per page (oldest goes first).
-  Blocks remember what they landed on, so they follow the layout. Saved per page.
-  `build off` / `build` in the shell, or the switch in the corner, turns it off/on.
+  Shared build mode (desktop): everyone sees the same blocks on the same page, live.
+  - Click empty space or plain text to drop a block. Links, buttons, inputs, cards
+    and the shell keep their normal behaviour. Click a block to stack on it.
+  - Right-click your own block to break it (officers can break any).
+  - Placing needs a sign-in; everyone can see. 3 colours. Limits are server-side.
+  - Blocks only land on stable things marked with data-anchor (same for every viewer),
+    other blocks, or the bottom of the page.
 */
 
 const SIZE = 26;
-const MAX_BLOCKS = 80;
 
 const TYPES = [
   { id: "blue", label: "CODES blue", cls: "bg-[#2a4aff] shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_6px_14px_-6px_rgba(42,74,255,0.8)]" },
@@ -24,43 +26,34 @@ const TYPES = [
 ] as const;
 type TypeId = (typeof TYPES)[number]["id"];
 
-// What blocks can land on.
-const SOLID = "h1, h2, h3, p, a[href], img, button, .panel, [data-solid], footer, pre";
-// Clicks on these keep their normal behaviour (never drop a block).
 const INTERACTIVE =
   "a, button, input, textarea, select, label, summary, [role=button], [role=dialog], [contenteditable], [data-build-ui], header, [aria-label='CODES terminal'], [aria-label^='Game'], [aria-label^='Block builder']";
 
-type Anchor = { kind: "el"; el: Element; dx: number; dy: number } | { kind: "block"; id: string } | { kind: "floor" };
-type Block = { id: string; x: number; type: TypeId; anchor: Anchor };
-type Saved = { id: string; x: number; type: TypeId; anchor: { kind: "el"; path: string; dx: number; dy: number } | { kind: "block"; id: string } | { kind: "floor" } };
+type Block = { id: string; anchor: string; dx: number; type: TypeId; uid: string; name: string; createdAt: number; pending?: boolean };
 
-function pathOf(el: Element): string {
-  const parts: string[] = [];
-  let node: Element | null = el;
-  while (node && node !== document.body) {
-    const parent: Element | null = node.parentElement;
-    if (!parent) break;
-    parts.unshift(`${node.tagName.toLowerCase()}:nth-child(${Array.prototype.indexOf.call(parent.children, node) + 1})`);
-    node = parent;
-  }
-  return "body > " + parts.join(" > ");
-}
-const docTop = (el: Element) => el.getBoundingClientRect().top + window.scrollY;
-const docLeft = (el: Element) => el.getBoundingClientRect().left + window.scrollX;
+const anchorEl = (name: string) => document.querySelector(`[data-anchor="${CSS.escape(name)}"]`);
 
 export default function BuildMode() {
   const pathname = usePathname();
-  const [enabled, setEnabled] = useState(false); // decided after mount (desktop + not switched off)
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  const blocksRef = useRef<Block[]>([]);
+  const [enabled, setEnabled] = useState(false);
+  const [remote, setRemote] = useState<Block[]>([]);
+  const [pending, setPending] = useState<Block[]>([]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set()); // optimistic breaks
   const [type, setType] = useState<TypeId>("blue");
   const typeRef = useRef<TypeId>("blue");
   const [, setTick] = useState(0);
-  const [falling, setFalling] = useState<Record<string, number>>({});
+  const [toast, setToast] = useState<string | null>(null);
   const [tip, setTip] = useState(false);
-  const storageKey = `codevents:build:${pathname}`;
-  blocksRef.current = blocks;
   typeRef.current = type;
+
+  const blocks = [...remote.filter((b) => !hidden.has(b.id)), ...pending];
+  const blocksRef = useRef<Block[]>(blocks);
+  blocksRef.current = blocks;
+
+  const say = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 3200);
+  };
 
   // ---- on by default on desktop; remembers if you switched it off ----
   useEffect(() => {
@@ -84,65 +77,21 @@ export default function BuildMode() {
     return () => window.removeEventListener("codevents:build", toggle);
   }, []);
 
-  const dismissTip = () => {
-    setTip(false);
-    try {
-      localStorage.setItem("codevents:build:tip", "1");
-    } catch {}
-  };
-
-  // ---- geometry ----
-  const yOf = useCallback((b: Block, list: Block[], depth = 0): number => {
-    const floor = document.documentElement.scrollHeight - SIZE;
-    if (depth > 200 || b.anchor.kind === "floor") return floor;
-    if (b.anchor.kind === "el") return b.anchor.el.isConnected ? docTop(b.anchor.el) + b.anchor.dy : floor;
-    const anchorId = b.anchor.id;
-    const parent = list.find((p) => p.id === anchorId);
-    return parent ? yOf(parent, list, depth + 1) - SIZE : floor;
-  }, []);
-  const xOf = useCallback((b: Block, list: Block[] = blocksRef.current, depth = 0): number => {
-    if (b.anchor.kind === "el" && b.anchor.el.isConnected) return docLeft(b.anchor.el) + b.anchor.dx;
-    if (b.anchor.kind === "block" && depth < 200) {
-      const anchorId = b.anchor.id;
-      const parent = list.find((p) => p.id === anchorId);
-      if (parent) return xOf(parent, list, depth + 1);
-    }
-    return b.x;
-  }, []);
-
-  // ---- load / save per page ----
+  // ---- live blocks for this page (visible even when building is off) ----
   useEffect(() => {
-    let saved: Saved[] = [];
-    try {
-      saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
-    } catch {}
-    setBlocks([]);
-    const t = setTimeout(() => {
-      setBlocks(
-        saved.map((s) => {
-          if (s.anchor.kind === "el") {
-            const el = document.querySelector(s.anchor.path);
-            return { id: s.id, x: s.x, type: s.type, anchor: el ? { kind: "el", el, dx: s.anchor.dx, dy: s.anchor.dy } : { kind: "floor" } };
-          }
-          return { id: s.id, x: s.x, type: s.type, anchor: s.anchor };
-        })
-      );
-    }, 300);
-    return () => clearTimeout(t);
-  }, [storageKey]);
-
-  useEffect(() => {
-    const toSave: Saved[] = blocks.map((b) => ({
-      id: b.id,
-      x: xOf(b),
-      type: b.type,
-      anchor: b.anchor.kind === "el" ? { kind: "el", path: pathOf(b.anchor.el), dx: b.anchor.dx, dy: b.anchor.dy } : b.anchor,
-    }));
-    try {
-      if (toSave.length) localStorage.setItem(storageKey, JSON.stringify(toSave));
-      else localStorage.removeItem(storageKey);
-    } catch {}
-  }, [blocks, storageKey, xOf]);
+    setRemote([]);
+    setPending([]);
+    setHidden(new Set());
+    const q = query(collection(clientDb, "buildBlocks"), where("page", "==", pathname));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setRemote(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Block, "id">) })));
+      },
+      (err) => console.warn("[build] live updates unavailable:", err.message)
+    );
+    return unsub;
+  }, [pathname]);
 
   // ---- follow layout changes ----
   useEffect(() => {
@@ -158,146 +107,166 @@ export default function BuildMode() {
     };
   }, []);
 
-  const blockAt = useCallback(
+  // ---- geometry (document coordinates) ----
+  const posOf = useCallback((b: Block, list: Block[], depth = 0): { x: number; y: number } | null => {
+    const floorY = document.documentElement.scrollHeight - SIZE;
+    if (depth > 200) return null;
+    if (b.anchor === "floor") return { x: b.dx, y: floorY };
+    if (b.anchor.startsWith("block:")) {
+      const parentId = b.anchor.slice(6);
+      const parent = list.find((p) => p.id === parentId);
+      if (!parent) return null;
+      const p = posOf(parent, list, depth + 1);
+      return p ? { x: p.x, y: p.y - SIZE } : null;
+    }
+    const el = anchorEl(b.anchor);
+    if (!el) return null; // anchor not on screen for this viewer: hide the block
+    const r = el.getBoundingClientRect();
+    const dx = Math.min(Math.max(0, b.dx), Math.max(0, r.width - SIZE));
+    return { x: r.left + window.scrollX + dx, y: r.top + window.scrollY - SIZE };
+  }, []);
+
+  const blockAtPoint = useCallback(
     (px: number, py: number) =>
       blocksRef.current.find((b) => {
-        const bx = xOf(b);
-        const by = yOf(b, blocksRef.current);
-        return px >= bx && px < bx + SIZE && py >= by && py < by + SIZE;
+        const p = posOf(b, blocksRef.current);
+        return p && px >= p.x && px < p.x + SIZE && py >= p.y && py < p.y + SIZE;
       }),
-    [xOf, yOf]
+    [posOf]
   );
 
+  /** Where a drop at (px, py) lands: on a block in that column, a data-anchor element, or the floor. */
   const resolveLanding = useCallback(
-    (px: number, py: number): { x: number; y: number; anchor: Anchor } => {
-      const x = Math.floor(px / SIZE) * SIZE;
-      const cx = x + SIZE / 2;
+    (px: number, py: number): { anchor: string; dx: number; x: number; y: number } => {
+      let best = { anchor: "floor", dx: Math.floor(px / SIZE) * SIZE, x: Math.floor(px / SIZE) * SIZE, y: document.documentElement.scrollHeight - SIZE };
       let bestTop = document.documentElement.scrollHeight;
-      let anchor: Anchor = { kind: "floor" };
       for (const b of blocksRef.current) {
-        if (Math.abs(xOf(b) - x) > SIZE / 2) continue;
-        const top = yOf(b, blocksRef.current);
-        if (top >= py - SIZE / 2 && top < bestTop) {
-          bestTop = top;
-          anchor = { kind: "block", id: b.id };
+        if (b.pending) continue;
+        const p = posOf(b, blocksRef.current);
+        if (!p || px < p.x || px >= p.x + SIZE) continue;
+        if (p.y >= py - SIZE / 2 && p.y < bestTop) {
+          bestTop = p.y;
+          best = { anchor: `block:${b.id}`, dx: 0, x: p.x, y: p.y - SIZE };
         }
       }
-      document.querySelectorAll(SOLID).forEach((el) => {
-        const h = el as HTMLElement;
-        if (h.closest("[data-build-ui], header, [aria-label='CODES terminal']")) return;
-        if (h.closest(".fixed") || getComputedStyle(h).position === "fixed") return;
+      document.querySelectorAll("[data-anchor]").forEach((el) => {
         const r = el.getBoundingClientRect();
-        if (r.width < SIZE || r.height < 8) return;
+        if (r.width < SIZE) return;
         const left = r.left + window.scrollX;
         const top = r.top + window.scrollY;
-        if (cx < left || cx > left + r.width) return;
+        if (px < left || px > left + r.width) return;
         if (top >= py - SIZE / 2 && top < bestTop) {
           bestTop = top;
-          anchor = { kind: "el", el, dx: x - left, dy: -SIZE };
+          const dx = Math.min(Math.floor((px - left) / SIZE) * SIZE, Math.max(0, Math.floor((r.width - SIZE) / SIZE) * SIZE));
+          best = { anchor: el.getAttribute("data-anchor")!, dx, x: left + dx, y: top - SIZE };
         }
       });
-      return { x, y: bestTop - SIZE, anchor };
+      return best;
     },
-    [xOf, yOf]
+    [posOf]
   );
 
   const drop = useCallback(
-    (px: number, py: number) => {
-      const hit = blockAt(px, py);
-      const land = hit
-        ? { x: xOf(hit), y: yOf(hit, blocksRef.current) - SIZE, anchor: { kind: "block", id: hit.id } as Anchor }
-        : resolveLanding(px, py);
-      if (land.y < 0) return;
-      const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-      setBlocks((bs) => {
-        let next = [...bs, { id, x: land.x, type: typeRef.current, anchor: land.anchor }];
-        // cap: drop the oldest block that nothing rests on
-        while (next.length > MAX_BLOCKS) {
-          const restedOn = new Set(next.map((b) => (b.anchor.kind === "block" ? b.anchor.id : "")));
-          const victim = next.find((b) => !restedOn.has(b.id)) ?? next[0];
-          next = next.filter((b) => b.id !== victim.id);
-        }
-        return next;
+    async (land: { anchor: string; dx: number }) => {
+      const tempId = `tmp${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+      setPending((p) => [...p, { id: tempId, anchor: land.anchor, dx: land.dx, type: typeRef.current, uid: "", name: "you", createdAt: Date.now(), pending: true }]);
+      const res = await placeBlock({ page: pathname, anchor: land.anchor, dx: land.dx, type: typeRef.current });
+      // the live snapshot brings the real block in; drop the placeholder either way
+      setTimeout(() => setPending((p) => p.filter((b) => b.id !== tempId)), res.ok ? 400 : 0);
+      if (!res.ok) {
+        say(res.error === "Please sign in first." ? "sign in to build: press ` and type login" : res.error);
+      }
+    },
+    [pathname]
+  );
+
+  const breakOne = useCallback(async (b: Block) => {
+    if (b.pending) return;
+    setHidden((h) => new Set(h).add(b.id));
+    const res = await breakBlockAction(b.id);
+    if (!res.ok) {
+      setHidden((h) => {
+        const n = new Set(h);
+        n.delete(b.id);
+        return n;
       });
-      const fell = Math.max(0, land.y - (py - SIZE / 2));
-      setFalling((f) => ({ ...f, [id]: fell }));
-      setTimeout(
-        () =>
-          setFalling((f) => {
-            const { [id]: _, ...rest } = f; // eslint-disable-line @typescript-eslint/no-unused-vars
-            return rest;
-          }),
-        320
-      );
-    },
-    [blockAt, resolveLanding, xOf, yOf]
-  );
+      say(res.error === "Please sign in first." ? "sign in to build: press ` and type login" : res.error);
+    }
+  }, []);
 
-  const breakBlock = useCallback(
-    (target: Block) => {
-      const tx = xOf(target);
-      setBlocks((bs) =>
-        bs
-          .filter((b) => b.id !== target.id)
-          .map((b) => (b.anchor.kind === "block" && b.anchor.id === target.id ? { ...b, anchor: target.anchor, x: tx } : b))
-      );
-    },
-    [xOf]
-  );
-
-  // ---- the always-on part: listen to normal clicks on the page ----
+  // ---- normal clicks on the page ----
   useEffect(() => {
     if (!enabled) return;
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0 || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
-      if (!t || t.closest(INTERACTIVE)) return;
-      if (window.getSelection()?.toString()) return; // they were selecting text
+      if (!t) return;
       if (document.querySelector("[aria-label='CODES terminal']")) return;
       const px = e.clientX + window.scrollX;
       const py = e.clientY + window.scrollY;
-      const hit = blockAt(px, py);
-      if (e.shiftKey && hit) return breakBlock(hit);
-      if (e.shiftKey) return;
-      drop(px, py);
+      const onBlock = t.closest("[data-block-id]");
+      if (onBlock) {
+        const b = blocksRef.current.find((x) => x.id === onBlock.getAttribute("data-block-id"));
+        if (!b) return;
+        if (e.shiftKey) return void breakOne(b);
+        if (!b.pending) void drop({ anchor: `block:${b.id}`, dx: 0 });
+        setTip(false);
+        return;
+      }
+      if (t.closest(INTERACTIVE) || e.shiftKey) return;
+      if (window.getSelection()?.toString()) return;
+      void drop(resolveLanding(px, py));
       setTip(false);
-    };
-    const onContext = (e: MouseEvent) => {
-      const hit = blockAt(e.clientX + window.scrollX, e.clientY + window.scrollY);
-      if (!hit) return; // normal right-click everywhere else
-      e.preventDefault();
-      breakBlock(hit);
     };
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName))) return;
-      if (document.querySelector("[aria-label='CODES terminal']")) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.querySelector("[aria-label='CODES terminal']") || e.metaKey || e.ctrlKey || e.altKey) return;
       const n = Number(e.key);
       if (n >= 1 && n <= TYPES.length) setType(TYPES[n - 1].id);
     };
     document.addEventListener("click", onClick);
-    document.addEventListener("contextmenu", onContext);
     window.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("click", onClick);
-      document.removeEventListener("contextmenu", onContext);
       window.removeEventListener("keydown", onKey);
     };
-  }, [enabled, blockAt, breakBlock, drop]);
+  }, [enabled, breakOne, drop, resolveLanding]);
+
+  void blockAtPoint; // kept for future hit-testing (e.g. touch)
+
+  const dismissTip = () => {
+    setTip(false);
+    try {
+      localStorage.setItem("codevents:build:tip", "1");
+    } catch {}
+  };
 
   return (
     <>
       {/* block layer, in document coordinates */}
-      <div aria-hidden className="pointer-events-none absolute left-0 top-0 z-[55] h-0 w-full" data-build-ui>
+      <div className="pointer-events-none absolute left-0 top-0 z-[55] h-0 w-full" data-build-ui>
         {blocks.map((b) => {
+          const p = posOf(b, blocks);
+          if (!p) return null;
           const t = TYPES.find((x) => x.id === b.type) ?? TYPES[0];
-          const fell = falling[b.id];
           return (
             <span
               key={b.id}
-              className={cn("absolute rounded-[5px]", t.cls, fell ? "animate-[blockfall_0.3s_cubic-bezier(.5,0,.75,0)]" : "")}
-              style={{ left: xOf(b, blocks), top: yOf(b, blocks), width: SIZE, height: SIZE, ["--fall" as string]: `${-(fell ?? 0)}px` }}
+              data-block-id={b.id}
+              title={b.pending ? "placing…" : `placed by ${b.name}`}
+              onContextMenu={(e) => {
+                if (!enabled) return;
+                e.preventDefault();
+                void breakOne(b);
+              }}
+              className={cn(
+                "absolute rounded-[5px] transition-[top,left] duration-200",
+                enabled ? "pointer-events-auto cursor-pointer" : "pointer-events-none",
+                t.cls,
+                b.pending && "animate-[blockfall_0.3s_cubic-bezier(.5,0,.75,0)] opacity-80"
+              )}
+              style={{ left: p.x, top: p.y, width: SIZE, height: SIZE, ["--fall" as string]: "-40px" }}
             />
           );
         })}
@@ -318,16 +287,16 @@ export default function BuildMode() {
                 <span className={cn("block size-full rounded-[3px]", t.cls)} />
               </button>
             ))}
-            <span className="px-1.5 font-mono text-[10px] tabular-nums text-neutral-500">{blocks.length}</span>
-            {blocks.length > 0 && (
-              <button onClick={() => setBlocks([])} className="rounded px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 hover:text-red-300">
-                clear
-              </button>
-            )}
+            <span className="px-1.5 font-mono text-[10px] tabular-nums text-neutral-500" title="Blocks on this page, from everyone">
+              {remote.length} here
+            </span>
+            <span className="flex items-center gap-1 px-1 font-mono text-[10px] text-emerald-400/80" title="Shared: everyone sees these, live">
+              <span className="size-1.5 animate-pulse rounded-full bg-emerald-400" /> live
+            </span>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: false } }))}
               className="rounded px-1.5 py-0.5 font-mono text-[10px] text-neutral-500 hover:text-neutral-200"
-              title="Turn building off"
+              title="Stop building (you'll still see blocks)"
             >
               off
             </button>
@@ -342,12 +311,16 @@ export default function BuildMode() {
         )}
       </div>
 
-      {enabled && tip && (
-        <div data-build-ui className="no-print fixed bottom-16 left-4 z-[57] hidden max-w-[260px] rounded-lg border border-white/10 bg-black/85 px-3 py-2 font-mono text-[11px] text-neutral-300 shadow-xl backdrop-blur [@media(pointer:fine)]:block">
-          psst: click any empty space to drop a block. right-click one to break it.
-          <button onClick={dismissTip} className="ml-2 text-neutral-500 hover:text-white">
-            got it
-          </button>
+      {enabled && (toast || tip) && (
+        <div data-build-ui className="no-print fixed bottom-16 left-4 z-[57] hidden max-w-[280px] rounded-lg border border-white/10 bg-black/85 px-3 py-2 font-mono text-[11px] text-neutral-300 shadow-xl backdrop-blur [@media(pointer:fine)]:block">
+          {toast ?? (
+            <>
+              psst: click any empty space to drop a block. everyone sees them, live. right-click yours to break it.
+              <button onClick={dismissTip} className="ml-2 text-neutral-500 hover:text-white">
+                got it
+              </button>
+            </>
+          )}
         </div>
       )}
     </>

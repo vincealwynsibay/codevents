@@ -81,7 +81,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
 
+      <div data-anchor="event-cover">
       <EventCover event={event} variant="banner" className="aspect-[21/9] max-h-[360px] min-h-[160px] w-full rounded-xl border" />
+      </div>
 
       {/* Header, then the sign-up panel, then details on phones; panel in a sticky side column on desktop. */}
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-x-10 lg:gap-y-0">
@@ -92,7 +94,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               {EVENT_TYPE_LABEL[event.type]} · {event.participation === "TEAM" ? `Teams of ${event.teamMin}–${event.teamMax}` : "Solo"}
             </span>
           </div>
-          <h1 className="mt-3 font-chakra text-4xl font-bold uppercase leading-tight sm:text-5xl">{event.title}</h1>
+          <h1 data-anchor="event-title" className="mt-3 font-chakra text-4xl font-bold uppercase leading-tight sm:text-5xl">{event.title}</h1>
           {event.tagline && <p className="mt-3 text-lg text-muted-foreground">{event.tagline}</p>}
 
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">

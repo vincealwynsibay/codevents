@@ -56,7 +56,7 @@ export default function HeroTerminal({ rows, className, maxRows = 4 }: { rows: H
   );
 
   return (
-    <div data-solid className={cn("max-w-xl overflow-hidden rounded-xl border border-white/10 bg-black/60 font-mono text-[12.5px] shadow-[0_20px_50px_-25px_rgba(42,74,255,0.7)] backdrop-blur", className)}>
+    <div data-solid data-anchor="hero-terminal" className={cn("max-w-xl overflow-hidden rounded-xl border border-white/10 bg-black/60 font-mono text-[12.5px] shadow-[0_20px_50px_-25px_rgba(42,74,255,0.7)] backdrop-blur", className)}>
       <div className="flex items-center gap-1.5 border-b border-white/10 bg-white/[0.03] px-3 py-2">
         <span className="size-2.5 rounded-full bg-red-500/70" />
         <span className="size-2.5 rounded-full bg-amber-400/70" />

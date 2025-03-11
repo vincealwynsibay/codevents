@@ -10,6 +10,7 @@ export default function EventCard({ event, showWinner }: { event: CodEvent; show
   return (
     <Link
       href={`/events/${event.id}`}
+      data-anchor={`event-${event.id}`}
       className="group panel hud hud-hover flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-20px_rgba(42,74,255,0.6)]"
     >
       <div className="overflow-hidden rounded-t-xl">

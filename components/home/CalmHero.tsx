@@ -36,7 +36,7 @@ export default function CalmHero({
       />
 
       <div className={cn("relative mx-auto px-4 pb-10 pt-14 sm:px-6 sm:pt-20", wide ? "max-w-[92rem] lg:px-10" : "max-w-6xl")}>
-        <div data-solid className="overflow-hidden rounded-2xl border border-white/10 bg-black/60 font-mono shadow-[0_30px_80px_-30px_rgba(42,74,255,0.6)] backdrop-blur">
+        <div data-solid data-anchor="hero" className="overflow-hidden rounded-2xl border border-white/10 bg-black/60 font-mono shadow-[0_30px_80px_-30px_rgba(42,74,255,0.6)] backdrop-blur">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
             <span className="size-3 rounded-full bg-white/15" />
             <span className="size-3 rounded-full bg-white/15" />
@@ -46,7 +46,7 @@ export default function CalmHero({
 
           <div className={cn("grid items-center gap-10 p-6 sm:p-10", wide ? "min-h-[460px] lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:p-16" : "lg:grid-cols-[1fr_1fr]")}>
             <div>
-              <h1 className={cn("font-chakra font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff]", wide ? "text-6xl sm:text-8xl" : "text-5xl sm:text-7xl")}>
+              <h1 data-anchor="hero-title" className={cn("font-chakra font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff]", wide ? "text-6xl sm:text-8xl" : "text-5xl sm:text-7xl")}>
                 CODEVENTS
               </h1>
               <p className="mt-6 max-w-md text-sm leading-relaxed text-neutral-400">
