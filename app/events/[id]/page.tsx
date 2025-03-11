@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CalendarDays, CalendarPlus, Clock, MapPin, Pencil, Users } from "lucide-react";
+import { CalendarPlus, Pencil } from "lucide-react";
 import { getViewer } from "@/lib/server/auth";
 import { getEvent, getRegistration, getRegistrationsForEvent, getTeam, getTeamsForEvent } from "@/lib/server/data";
 import {
   EVENT_TYPE_LABEL,
+  PHASE_LABEL,
   formatDateTime,
   formatRange,
   getPhase,
@@ -14,8 +15,8 @@ import {
   qrPayload,
   registrationId,
 } from "@/lib/domain";
-import EventCover from "@/components/events/EventCover";
-import PhaseBadge from "@/components/events/PhaseBadge";
+import { DateBlock, Heading, SpotsBar, Window, wrap } from "@/components/home/HomeSections";
+import { cn } from "@/lib/utils";
 import Countdown from "@/components/events/Countdown";
 import Podium from "@/components/events/Podium";
 import RegisterPanel, { RegisterState } from "@/components/events/RegisterPanel";
@@ -67,9 +68,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const spotsLeft = event.capacity !== null ? Math.max(0, event.capacity - event.registrationCount) : null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className={cn(wrap, "py-10")}>
       {viewer?.role && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 font-mono text-xs text-neutral-400">
           <span>
             You&apos;re viewing this as an officer{event.status === "DRAFT" && " · this draft is hidden from students"}.
           </span>
@@ -81,40 +82,63 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
 
-      <div data-anchor="event-cover">
-      <EventCover event={event} variant="banner" className="aspect-[21/9] max-h-[360px] min-h-[160px] w-full rounded-xl border" />
-      </div>
-
       {/* Header, then the sign-up panel, then details on phones; panel in a sticky side column on desktop. */}
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-x-10 lg:gap-y-0">
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <PhaseBadge phase={phase} />
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              {EVENT_TYPE_LABEL[event.type]} · {event.participation === "TEAM" ? `Teams of ${event.teamMin}–${event.teamMax}` : "Solo"}
-            </span>
+          <p className="font-mono text-xs text-neutral-500">
+            <span className="text-emerald-300">codes@umtc</span>:~$ cd ~/{isPast(phase) ? "past" : "events"}/
+            {event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}
+          </p>
+          <div data-anchor="event-header" className="mt-5 flex items-start gap-5">
+            <DateBlock iso={event.startDate} big />
+            <div className="min-w-0">
+              <p className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                <span
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    phase === "REGISTRATION_OPEN" ? "bg-emerald-400" : phase === "ONGOING" ? "bg-blue-400" : phase === "CANCELLED" ? "bg-red-400" : isPast(phase) ? "bg-neutral-500" : "bg-amber-400"
+                  )}
+                />
+                {PHASE_LABEL[phase]} · {EVENT_TYPE_LABEL[event.type]} · {event.participation === "TEAM" ? `teams of ${event.teamMin}–${event.teamMax}` : "solo"}
+              </p>
+              <h1
+                data-anchor="event-title"
+                className="mt-2 font-chakra text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff] sm:text-6xl"
+              >
+                {event.title}
+              </h1>
+              {event.tagline && <p className="mt-3 max-w-2xl text-base text-neutral-400">{event.tagline}</p>}
+            </div>
           </div>
-          <h1 data-anchor="event-title" className="mt-3 font-chakra text-4xl font-bold uppercase leading-tight sm:text-5xl">{event.title}</h1>
-          {event.tagline && <p className="mt-3 text-lg text-muted-foreground">{event.tagline}</p>}
 
-          <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-            <Info icon={<CalendarDays />} label="When" value={formatRange(event.startDate, event.endDate)} />
-            <Info icon={<MapPin />} label="Where" value={event.venue} />
-            {event.registrationDeadline && (
-              <Info icon={<Clock />} label="Register by" value={formatDateTime(event.registrationDeadline)} />
-            )}
-            <Info
-              icon={<Users />}
-              label="Spots"
-              value={`${event.registrationCount} signed up${spotsLeft !== null ? ` · ${spotsLeft} left` : ""}`}
-            />
-          </div>
-
+          <Window title="cat info.txt" className="mt-8">
+            <dl className="grid gap-2 p-5 text-sm">
+              {[
+                ["when", formatRange(event.startDate, event.endDate)],
+                ["where", event.venue],
+                ...(event.registrationDeadline ? [["register by", formatDateTime(event.registrationDeadline)]] : []),
+                ["spots", `${event.registrationCount} signed up${spotsLeft !== null ? ` · ${spotsLeft} left` : ""}`],
+              ].map(([k, v]) => (
+                <div key={k} className="flex gap-4">
+                  <dt className="w-24 shrink-0 text-neutral-500">{k}</dt>
+                  <dd className="text-neutral-200">{v}</dd>
+                </div>
+              ))}
+              {event.capacity !== null && (
+                <div className="flex gap-4">
+                  <dt className="w-24 shrink-0" />
+                  <dd>
+                    <SpotsBar n={event.registrationCount} cap={event.capacity} />
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </Window>
         </div>
 
         <aside className="space-y-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-24 lg:self-start">
           {!isPast(phase) && phase !== "CANCELLED" && (
-            <div className="panel p-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
               <Countdown
                 to={phase === "ONGOING" ? event.endDate : event.startDate}
                 label={phase === "ONGOING" ? "Ends in" : "Starts in"}
@@ -145,31 +169,27 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         </aside>
 
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-          <section className="lg:mt-10">
-            <h2 className="section-label mb-4">About</h2>
+          <section className="lg:mt-12">
+            <Heading title="About" />
             <div className="prose-event">{event.description}</div>
           </section>
 
           {event.prizes.length > 0 && (
             <section className="mt-12">
-              <h2 className="section-label mb-5">
-                {event.winners.length > 0 ? "Winners" : phase === "AWAITING_RESULTS" ? "Prizes · results coming soon" : "Prizes"}
-              </h2>
+              <Heading title={event.winners.length > 0 ? "Winners" : phase === "AWAITING_RESULTS" ? "Prizes · results soon" : "Prizes"} />
               <Podium event={event} />
             </section>
           )}
 
           <section className="mt-12">
-            <h2 className="section-label mb-5">
-              {event.participation === "TEAM" ? `Teams (${teams.length})` : `Who's going (${registrations.length})`}
-            </h2>
+            <Heading title={event.participation === "TEAM" ? `Teams (${teams.length})` : `Who's going (${registrations.length})`} />
             {event.participation === "TEAM" ? (
               teams.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No teams yet. Be the first.</p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {teams.map((t) => (
-                    <div key={t.id} className="panel p-4">
+                    <div key={t.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-chakra font-bold">{t.name}</p>
                         <span className="text-xs text-muted-foreground">
@@ -186,7 +206,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             ) : (
               <div className="flex flex-wrap gap-2">
                 {registrations.slice(0, 60).map((r) => (
-                  <div key={r.id} className="flex items-center gap-2 rounded-full border bg-card/60 py-1 pl-1 pr-3 text-sm">
+                  <div key={r.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] py-1 pl-1 pr-3 text-sm">
                     <Avatar name={r.name} src={r.photoURL} size={24} />
                     <span>{r.name}</span>
                   </div>
@@ -204,16 +224,3 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   );
 }
 
-function Info({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="panel flex items-start gap-3 p-3">
-      <span className="grid size-8 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-blue-300 shadow-[0_0_16px_-4px_rgba(42,74,255,0.7)] [&_svg]:size-4">
-        {icon}
-      </span>
-      <div>
-        <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
-        <p className="text-foreground">{value}</p>
-      </div>
-    </div>
-  );
-}

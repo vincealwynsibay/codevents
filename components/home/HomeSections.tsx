@@ -16,7 +16,7 @@ const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"], display: "swap
 type Props = { featured: CodEvent | null; upcoming: CodEvent[]; past: CodEvent[] };
 
 const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-const wrap = "mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-10";
+export const wrap = "mx-auto max-w-[92rem] px-4 sm:px-6 lg:px-10";
 
 const TAG: Record<string, { text: string; cls: string }> = {
   REGISTRATION_OPEN: { text: "OPEN", cls: "text-emerald-300" },
@@ -34,7 +34,7 @@ function asciiBar(n: number, cap: number | null, width = 14) {
   return `[${"█".repeat(filled)}${"░".repeat(width - filled)}] ${n}/${cap}`;
 }
 
-function RegisterButton({ event, label }: { event: CodEvent; label: string }) {
+export function RegisterButton({ event, label }: { event: CodEvent; label: string }) {
   return (
     <Link
       href={`/events/${event.id}`}
@@ -45,7 +45,7 @@ function RegisterButton({ event, label }: { event: CodEvent; label: string }) {
   );
 }
 
-function Window({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
+export function Window({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <div data-anchor={`win-${slug(title)}`} className={cn("overflow-hidden rounded-2xl border border-white/10 bg-black/50 font-mono backdrop-blur", className)}>
       <div className="flex items-center gap-2 border-b border-white/10 px-4 py-2.5">
@@ -176,7 +176,7 @@ export function SectionsShell({ featured, upcoming, past }: Props) {
 // ===========================================================================
 // B · Clean cards
 // ===========================================================================
-function DateBlock({ iso, big }: { iso: string; big?: boolean }) {
+export function DateBlock({ iso, big }: { iso: string; big?: boolean }) {
   return (
     <div className={cn("flex shrink-0 flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] font-chakra", big ? "h-28 w-24" : "h-20 w-16")}>
       <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-500">{formatDate(iso, { month: "short", day: undefined, year: undefined })}</span>
@@ -186,7 +186,7 @@ function DateBlock({ iso, big }: { iso: string; big?: boolean }) {
   );
 }
 
-function SpotsBar({ n, cap }: { n: number; cap: number | null }) {
+export function SpotsBar({ n, cap }: { n: number; cap: number | null }) {
   if (!cap) return <span className="text-xs text-neutral-500">{n} signed up</span>;
   return (
     <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ function SpotsBar({ n, cap }: { n: number; cap: number | null }) {
   );
 }
 
-function Heading({ title, href, link }: { title: string; href?: string; link?: string }) {
+export function Heading({ title, href, link }: { title: string; href?: string; link?: string }) {
   return (
     <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/10 pb-3">
       <h2 className="font-chakra text-xl font-bold uppercase tracking-wide text-white">{title}</h2>
@@ -248,32 +248,9 @@ export function SectionsCards({ featured, upcoming, past }: Props) {
         <section>
           <Heading title="Coming up" href="/events" />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {upcoming.map((e) => {
-              const p = getPhase(e);
-              return (
-                <Link
-                  key={e.id}
-                  href={`/events/${e.id}`}
-                  data-anchor={`event-${e.id}`}
-                  className="group flex gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/25 hover:bg-white/[0.04]"
-                >
-                  <DateBlock iso={e.startDate} />
-                  <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 text-xs text-neutral-500">
-                      <span className={cn("size-1.5 rounded-full", p === "REGISTRATION_OPEN" ? "bg-emerald-400" : p === "ONGOING" ? "bg-blue-400" : "bg-amber-400")} />
-                      {PHASE_LABEL[p]} · {EVENT_TYPE_LABEL[e.type]}
-                    </p>
-                    <p className="mt-1 truncate font-chakra text-lg font-bold text-white group-hover:text-blue-200">{e.title}</p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {formatTime(e.startDate)} · {e.venue}
-                    </p>
-                    <div className="mt-3">
-                      <SpotsBar n={e.registrationCount} cap={e.capacity} />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+            {upcoming.map((e) => (
+              <EventDateCard key={e.id} event={e} />
+            ))}
           </div>
         </section>
       )}
@@ -281,30 +258,64 @@ export function SectionsCards({ featured, upcoming, past }: Props) {
       {past.length > 0 && (
         <section>
           <Heading title="Hall of fame" href="/events?view=past" />
-          <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-white/[0.02]">
-            {past.slice(0, 5).map((e) => (
-              <Link key={e.id} href={`/events/${e.id}`} className="group grid gap-2 px-5 py-4 transition-colors hover:bg-white/[0.03] sm:grid-cols-[120px_1fr_2fr] sm:items-center">
-                <span className="text-xs text-neutral-500">{formatDate(e.startDate)}</span>
-                <span className="font-chakra font-bold text-white group-hover:text-blue-200">{e.title}</span>
-                <span className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-neutral-400">
-                  {e.winners.length === 0 ? (
-                    <span className="text-neutral-600">{e.prizes.length ? "Results coming soon" : "—"}</span>
-                  ) : (
-                    [...e.winners]
-                      .sort((a, b) => a.place - b.place)
-                      .map((w) => (
-                        <span key={w.place} className="flex items-center gap-1.5">
-                          <span className={cn("size-2 rounded-full", ["", "bg-amber-300", "bg-neutral-300", "bg-orange-400"][w.place])} />
-                          {w.name}
-                        </span>
-                      ))
-                  )}
-                </span>
-              </Link>
-            ))}
-          </div>
+          <PodiumRows events={past.slice(0, 5)} />
         </section>
       )}
+    </div>
+  );
+}
+
+/** Upcoming-event card: date block, status, title, time · venue, spots bar. */
+export function EventDateCard({ event: e }: { event: CodEvent }) {
+  const p = getPhase(e);
+  return (
+    <Link
+      href={`/events/${e.id}`}
+      data-anchor={`event-${e.id}`}
+      className="group flex gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-white/25 hover:bg-white/[0.04]"
+    >
+      <DateBlock iso={e.startDate} />
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-2 text-xs text-neutral-500">
+          <span className={cn("size-1.5 rounded-full", p === "REGISTRATION_OPEN" ? "bg-emerald-400" : p === "ONGOING" ? "bg-blue-400" : p === "CANCELLED" ? "bg-red-400" : "bg-amber-400")} />
+          {PHASE_LABEL[p]} · {EVENT_TYPE_LABEL[e.type]}
+        </p>
+        <p className="mt-1 truncate font-chakra text-lg font-bold text-white group-hover:text-blue-200">{e.title}</p>
+        <p className="truncate text-xs text-neutral-500">
+          {formatTime(e.startDate)} · {e.venue}
+        </p>
+        <div className="mt-3">
+          <SpotsBar n={e.registrationCount} cap={e.capacity} />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+/** Past events as podium rows: date, title, winners with medal dots. */
+export function PodiumRows({ events }: { events: CodEvent[] }) {
+  return (
+    <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-white/[0.02]">
+      {events.map((e) => (
+        <Link key={e.id} href={`/events/${e.id}`} className="group grid gap-2 px-5 py-4 transition-colors hover:bg-white/[0.03] sm:grid-cols-[120px_1fr_2fr] sm:items-center">
+          <span className="text-xs text-neutral-500">{formatDate(e.startDate)}</span>
+          <span className="font-chakra font-bold text-white group-hover:text-blue-200">{e.title}</span>
+          <span className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-neutral-400">
+            {e.winners.length === 0 ? (
+              <span className="text-neutral-600">{e.prizes.length ? "Results coming soon" : EVENT_TYPE_LABEL[e.type]}</span>
+            ) : (
+              [...e.winners]
+                .sort((a, b) => a.place - b.place)
+                .map((w) => (
+                  <span key={w.place} className="flex items-center gap-1.5">
+                    <span className={cn("size-2 rounded-full", ["", "bg-amber-300", "bg-neutral-300", "bg-orange-400"][w.place])} />
+                    {w.name}
+                  </span>
+                ))
+            )}
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }

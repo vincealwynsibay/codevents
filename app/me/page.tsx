@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Award, CalendarDays, MapPin } from "lucide-react";
+import { Award } from "lucide-react";
 import { requireViewer } from "@/lib/server/auth";
 import { getEventsByIds, getRegistrationsForUser } from "@/lib/server/data";
-import { formatDateTime, getPhase, isPast, profileNeedsUpdate, qrPayload } from "@/lib/domain";
-import PhaseBadge from "@/components/events/PhaseBadge";
+import { PHASE_LABEL, formatDate, formatTime, getPhase, isPast, profileNeedsUpdate, qrPayload } from "@/lib/domain";
+import { DateBlock, Heading, wrap } from "@/components/home/HomeSections";
+import { cn } from "@/lib/utils";
 import TicketQr from "@/components/events/TicketQr";
 import Avatar from "@/components/site/Avatar";
-import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My events" };
@@ -32,63 +32,79 @@ export default async function MyEventsPage() {
   const attended = past.filter((r) => r.reg.checkedInAt).length;
   const wins = past.filter((r) => r.event.winners.some((w) => w.refId === r.reg.id || w.refId === r.reg.teamId)).length;
 
+  const who = (viewer.profile?.name || viewer.user.name).split(" ")[0].toLowerCase();
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <Avatar name={viewer.profile?.name || viewer.user.name} src={viewer.user.picture} size={56} />
+    <div className={cn(wrap, "py-12")}>
+      <p className="font-mono text-xs text-neutral-500">
+        <span className="text-emerald-300">codes@umtc</span>:~$ whoami
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-5">
+        <Avatar name={viewer.profile?.name || viewer.user.name} src={viewer.user.picture} size={64} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-chakra text-3xl font-bold">{viewer.profile?.name || viewer.user.name}</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="font-chakra text-4xl font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff] sm:text-5xl">
+            {viewer.profile?.name || viewer.user.name}
+          </h1>
+          <p className="mt-2 font-mono text-xs text-neutral-500">
             {viewer.profile ? `${viewer.profile.course} · ${viewer.profile.yearLevel}` : viewer.user.email}
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/onboarding?edit=1">Edit profile</Link>
-        </Button>
+        <Link href="/onboarding?edit=1" className="rounded-md border border-white/15 px-3 py-2 font-mono text-xs text-neutral-300 hover:border-white/30 hover:text-white">
+          edit profile
+        </Link>
       </div>
 
-      <div className="mt-8 grid grid-cols-3 gap-3">
-        <Stat label="Signed up" value={rows.length} />
-        <Stat label="Attended" value={attended} />
-        <Stat label="Podium finishes" value={wins} />
-      </div>
+      <dl className="mt-8 grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/[0.02]">
+        {[
+          ["signed up", rows.length],
+          ["attended", attended],
+          ["podium", wins],
+        ].map(([label, value]) => (
+          <div key={label} className="px-5 py-4">
+            <dd className="font-chakra text-3xl font-bold tabular-nums text-white">{value}</dd>
+            <dt className="font-mono text-[11px] text-neutral-500">{label}</dt>
+          </div>
+        ))}
+      </dl>
 
-      <section className="mt-12">
-        <h2 className="section-label">Upcoming tickets</h2>
+      <section className="mt-14">
+        <Heading title="Tickets" />
         {upcoming.length === 0 ? (
-          <div className="panel mt-4 px-6 py-10 text-center text-muted-foreground">
-            You haven&apos;t signed up for anything yet.{" "}
-            <Link href="/events" className="text-blue-300 hover:underline">
-              Browse events
-            </Link>
+          <div className="rounded-2xl border border-dashed border-white/10 px-6 py-12 text-center font-mono text-sm text-neutral-500">
+            no tickets yet.{" "}
+            <Link href="/events" className="text-neutral-200 underline-offset-4 hover:underline">
+              cd ~/events
+            </Link>{" "}
+            to find one.
           </div>
         ) : (
-          <div className="mt-4 space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {upcoming.map(({ reg, event, phase }) => (
-              <div key={reg.id} className="panel hud relative grid gap-5 overflow-hidden p-5 sm:grid-cols-[1fr_auto]">
-                <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 [mask-image:linear-gradient(90deg,black,transparent_60%)]" />
-                <div className="relative space-y-2">
-                  <PhaseBadge phase={phase} />
-                  <Link href={`/events/${event.id}`} className="block font-chakra text-2xl font-bold hover:text-blue-200">
-                    {event.title}
-                  </Link>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarDays className="size-4" /> {formatDateTime(event.startDate)}
-                  </p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="size-4" /> {event.venue}
-                  </p>
-                  <p className="pt-2 text-sm">
-                    {reg.checkedInAt ? (
-                      <span className="text-emerald-300">Checked in at {formatDateTime(reg.checkedInAt)}</span>
-                    ) : (
-                      <span className="text-muted-foreground">Show the QR code at the entrance to check in.</span>
-                    )}
-                  </p>
+              <div key={reg.id} className="grid gap-5 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:grid-cols-[1fr_auto]">
+                <div className="flex gap-4">
+                  <DateBlock iso={event.startDate} />
+                  <div className="min-w-0 space-y-1.5">
+                    <p className="flex items-center gap-2 text-xs text-neutral-500">
+                      <span className={cn("size-1.5 rounded-full", phase === "REGISTRATION_OPEN" ? "bg-emerald-400" : phase === "ONGOING" ? "bg-blue-400" : "bg-amber-400")} />
+                      {PHASE_LABEL[phase]}
+                    </p>
+                    <Link href={`/events/${event.id}`} className="block font-chakra text-xl font-bold leading-tight text-white hover:text-blue-200">
+                      {event.title}
+                    </Link>
+                    <p className="text-xs text-neutral-500">
+                      {formatTime(event.startDate)} · {event.venue}
+                    </p>
+                    <p className="pt-1 font-mono text-xs">
+                      {reg.checkedInAt ? (
+                        <span className="text-emerald-300">✓ checked in {formatTime(reg.checkedInAt)}</span>
+                      ) : (
+                        <span className="text-neutral-500">show the QR at the entrance</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div className="relative border-t border-dashed border-white/15 pt-5 sm:w-[200px] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
-                  <p className="mb-2 text-center font-chakra text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Admit one</p>
-                  <TicketQr value={qrPayload(reg)} size={170} />
+                <div className="border-t border-dashed border-white/10 pt-4 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+                  <TicketQr value={qrPayload(reg)} size={140} />
                 </div>
               </div>
             ))}
@@ -97,29 +113,31 @@ export default async function MyEventsPage() {
       </section>
 
       {past.length > 0 && (
-        <section className="mt-12">
-          <h2 className="section-label">History</h2>
-          <div className="panel mt-4 divide-y">
+        <section className="mt-14">
+          <Heading title="History" />
+          <div className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-white/[0.02]">
             {past.map(({ reg, event, phase }) => {
               const win = event.winners.find((w) => w.refId === reg.id || w.refId === reg.teamId);
               return (
-                <div key={reg.id} className="flex flex-wrap items-center gap-3 p-4">
-                  <div className="min-w-0 flex-1">
-                    <Link href={`/events/${event.id}`} className="font-medium hover:text-blue-200">
-                      {event.title}
+                <div key={reg.id} className="grid items-center gap-2 px-5 py-4 sm:grid-cols-[120px_1fr_auto_auto] sm:gap-5">
+                  <span className="text-xs text-neutral-500">{formatDate(event.startDate)}</span>
+                  <Link href={`/events/${event.id}`} className="font-chakra font-bold text-white hover:text-blue-200">
+                    {event.title}
+                  </Link>
+                  <span className="font-mono text-xs text-neutral-500">
+                    {phase === "CANCELLED" ? "cancelled" : reg.checkedInAt ? "attended" : "didn't check in"}
+                    {win && (
+                      <span className={cn("ml-2", ["", "text-amber-300", "text-neutral-300", "text-orange-300"][win.place])}>
+                        · {["", "1st", "2nd", "3rd"][win.place]} place
+                      </span>
+                    )}
+                  </span>
+                  {reg.checkedInAt && phase !== "CANCELLED" ? (
+                    <Link href={`/certificates/${reg.id}`} className="flex items-center gap-1.5 rounded-md border border-white/15 px-2.5 py-1.5 font-mono text-xs text-neutral-300 hover:border-white/30 hover:text-white">
+                      <Award className="size-3.5" /> certificate
                     </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDateTime(event.startDate)} ·{" "}
-                      {phase === "CANCELLED" ? "Cancelled" : reg.checkedInAt ? "Attended" : "Didn't check in"}
-                      {win && <span className="text-amber-300"> · {["", "1st", "2nd", "3rd"][win.place]} place 🏆</span>}
-                    </p>
-                  </div>
-                  {reg.checkedInAt && phase !== "CANCELLED" && (
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/certificates/${reg.id}`}>
-                        <Award /> Certificate
-                      </Link>
-                    </Button>
+                  ) : (
+                    <span />
                   )}
                 </div>
               );
@@ -127,16 +145,7 @@ export default async function MyEventsPage() {
           </div>
         </section>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="panel relative overflow-hidden p-4">
-      <div className="dot-bg pointer-events-none absolute -right-4 -top-4 size-20 opacity-30 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
-      <p className="relative font-chakra text-3xl font-bold tabular-nums">{value}</p>
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="mt-10 font-mono text-[11px] text-neutral-600">tip: `ticket` in the shell shows your QR too, {who}.</p>
     </div>
   );
 }

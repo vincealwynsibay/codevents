@@ -5,7 +5,7 @@ export default function Footer() {
     <footer data-anchor="footer" className="no-print relative mt-28 overflow-hidden border-t border-white/[0.06]">
       <div className="glow-line absolute inset-x-0 top-0 opacity-40" />
       <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
-      <div className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+      <div className="relative mx-auto max-w-[92rem] px-4 pt-10 sm:px-6 lg:px-10">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
           <div className="space-y-2">
             <p className="font-chakra text-sm font-bold tracking-wider">
