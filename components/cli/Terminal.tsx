@@ -6,6 +6,7 @@ import { Maximize2, Minimize2, X } from "lucide-react";
 import QRCode from "qrcode";
 import { cancelRegistration, registerForEvent, saveProfile } from "@/lib/actions/registrations";
 import { cn } from "@/lib/utils";
+import { signInWithGoogle } from "@/lib/client/signin";
 
 /*
   The CODES shell. The whole app as a tiny filesystem:
@@ -610,12 +611,27 @@ export default function Terminal() {
         break;
       }
 
-      case "login":
+      case "login": {
         if (d!.viewer) return print({ text: `already signed in as ${d!.viewer.email}`, tone: "dim" });
-        go(`/login?next=${encodeURIComponent(pathname)}`);
-        setTty(false);
-        setOpen(false);
+        print({ text: "opening Google sign-in… use your @umindanao.edu.ph account", tone: "dim" });
+        setBusy(true);
+        const res = await signInWithGoogle();
+        setBusy(false);
+        if (!res.ok) return print({ text: `login: ${res.error}`, tone: res.cancelled ? "dim" : "err" });
+        const fresh = await load();
+        router.refresh();
+        print({ text: `✓ signed in as ${fresh?.viewer?.name ?? "you"} (${fresh?.viewer?.email ?? ""})`, tone: "ok" });
+        if (fresh?.viewer && !fresh.viewer.profileComplete) {
+          print(
+            { text: "one more step: set your course and year so you can register.", tone: "warn" },
+            { text: '  profile --course "BS Computer Science" --year "2nd Year"', tone: "out" }
+          );
+        } else {
+          print({ text: "next: `cd ~/events` → `ls` → `cd 1` → `register`", tone: "dim" });
+        }
+        setTimeout(() => inputRef.current?.focus(), 50);
         break;
+      }
 
       case "logout":
         await fetch("/api/session", { method: "DELETE" });
