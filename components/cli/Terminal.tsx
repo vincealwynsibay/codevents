@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Maximize2, Minimize2, X } from "lucide-react";
 import QRCode from "qrcode";
 import { cancelRegistration, registerForEvent, saveProfile } from "@/lib/actions/registrations";
+import { clearBuildPage } from "@/lib/actions/builds";
 import { cn } from "@/lib/utils";
 import { signInWithGoogle } from "@/lib/client/signin";
 
@@ -746,6 +747,15 @@ export default function Terminal() {
         print({ text: "rm: nice try.", tone: "err" });
         break;
       case "build":
+        if (arg === "clear") {
+          // officers only; the server checks the role
+          setBusy(true);
+          const res = await clearBuildPage(pathname);
+          setBusy(false);
+          if (!res.ok) return print({ text: `build clear: ${res.error}`, tone: "err" });
+          print({ text: `✓ ${res.message}`, tone: "ok" });
+          break;
+        }
         window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: arg !== "off" } }));
         print({ text: arg === "off" ? "building is off. `build` turns it back on." : "building is on: click any empty space to drop a block, right-click one to break it.", tone: "ok" });
         setTty(false);
