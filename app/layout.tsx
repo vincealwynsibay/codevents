@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, Geist } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 import Navbar from "@/components/site/Navbar";
 import Footer from "@/components/site/Footer";
 import { Toaster } from "@/components/ui/toaster";
@@ -20,10 +21,10 @@ const chakraPetch = Chakra_Petch({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: { default: "codevents", template: "%s · codevents" },
   description:
     "Hackathons, talks and workshops by CODES — UM Tagum College's computing society.",
-  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({

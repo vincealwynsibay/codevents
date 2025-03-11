@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MarkStack, WordmarkStack } from "@/components/brand/Logo";
 
 export default function Footer() {
   return (
@@ -8,8 +9,9 @@ export default function Footer() {
       <div className="relative mx-auto max-w-[92rem] px-4 pt-10 sm:px-6 lg:px-10">
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
           <div className="space-y-2">
-            <p className="font-chakra text-sm font-bold tracking-wider">
-              CODE<span className="text-blue-300">VENTS</span>
+            <p className="flex items-center gap-2">
+              <MarkStack size={24} />
+              <WordmarkStack className="text-sm tracking-wider" shadow={2} />
             </p>
             <p className="max-w-xs text-sm text-muted-foreground">
               Hackathons, talks and workshops by CODES, the computing society of UM Tagum College.

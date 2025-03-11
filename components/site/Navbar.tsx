@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { MarkStack, WordmarkStack } from "@/components/brand/Logo";
 import { getViewer } from "@/lib/server/auth";
 import UserMenu from "./UserMenu";
 import TerminalButton from "@/components/cli/TerminalButton";
@@ -12,13 +12,8 @@ export default async function Navbar() {
       <div className="mx-auto flex h-16 max-w-[92rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
         <div className="flex items-center gap-6">
           <Link href="/" data-egg="logo" className="group flex items-center gap-2 font-chakra text-lg font-bold tracking-wider">
-            <span className="relative grid size-8 place-items-center rounded-md border border-white/10 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors group-hover:border-primary/60">
-              <Image src="/images/codes.png" alt="" width={20} height={20} />
-            </span>
-            <span>
-              CODE<span className="text-blue-300">VENTS</span>
-              <span className="blink ml-0.5 text-blue-300">_</span>
-            </span>
+            <MarkStack size={32} className="transition-transform group-hover:-translate-y-px" />
+            <WordmarkStack className="text-lg tracking-wide" shadow={2} />
           </Link>
           <nav className="hidden items-center gap-5 font-chakra text-sm text-muted-foreground sm:flex">
             <Link href="/events" className="transition-colors hover:text-foreground">
