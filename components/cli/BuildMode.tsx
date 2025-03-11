@@ -41,6 +41,11 @@ type Block = {
   createdAt: number;
   expiresAt?: number;
   pending?: boolean;
+  // falling-from-the-cursor animation (local placeholder only)
+  offX?: number;
+  offY?: number;
+  fallMs?: number;
+  realId?: string;
 };
 
 const anchorEl = (name: string) => document.querySelector(`[data-anchor="${CSS.escape(name)}"]`);
@@ -58,7 +63,9 @@ export default function BuildMode() {
   const [tip, setTip] = useState(false);
   typeRef.current = type;
 
-  const blocks = [...remote.filter((b) => !hidden.has(b.id)), ...pending];
+  // while a placeholder is still falling, hide the real block it turned into (no jump)
+  const takenOver = new Set(pending.map((b) => b.realId).filter(Boolean) as string[]);
+  const blocks = [...remote.filter((b) => !hidden.has(b.id) && !takenOver.has(b.id)), ...pending];
   const blocksRef = useRef<Block[]>(blocks);
   blocksRef.current = blocks;
 
@@ -185,17 +192,32 @@ export default function BuildMode() {
   );
 
   const drop = useCallback(
-    async (land: { anchor: string; dx: number }) => {
+    async (land: { anchor: string; dx: number }, from: { x: number; y: number }) => {
       const tempId = `tmp${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
-      setPending((p) => [...p, { id: tempId, anchor: land.anchor, dx: land.dx, type: typeRef.current, uid: "", name: "you", createdAt: Date.now(), pending: true }]);
-      const res = await placeBlock({ page: pathname, anchor: land.anchor, dx: land.dx, type: typeRef.current });
-      // the live snapshot brings the real block in; drop the placeholder either way
-      setTimeout(() => setPending((p) => p.filter((b) => b.id !== tempId)), res.ok ? 400 : 0);
-      if (!res.ok) {
-        say(res.error);
+      const started = Date.now();
+      const draft: Block = { id: tempId, anchor: land.anchor, dx: land.dx, type: typeRef.current, uid: "", name: "you", createdAt: started, pending: true };
+      // start centred on the cursor, fall to where it lands; longer drops take longer (gravity)
+      const to = posOf(draft, blocksRef.current);
+      if (to) {
+        draft.offX = from.x - SIZE / 2 - to.x;
+        draft.offY = from.y - SIZE / 2 - to.y;
+        const dist = Math.hypot(draft.offX, draft.offY);
+        draft.fallMs = Math.round(Math.min(900, Math.max(160, Math.sqrt(dist) * 32)));
       }
+      setPending((p) => [...p, draft]);
+      const res = await placeBlock({ page: pathname, anchor: land.anchor, dx: land.dx, type: typeRef.current });
+      if (!res.ok) {
+        setPending((p) => p.filter((b) => b.id !== tempId));
+        say(res.error);
+        return;
+      }
+      // hand over to the real block once the fall has finished
+      const realId = res.data?.id;
+      setPending((p) => p.map((b) => (b.id === tempId ? { ...b, realId } : b)));
+      const remaining = Math.max(0, (draft.fallMs ?? 0) - (Date.now() - started)) + 80;
+      setTimeout(() => setPending((p) => p.filter((b) => b.id !== tempId)), remaining);
     },
-    [pathname]
+    [pathname, posOf]
   );
 
   const breakOne = useCallback(async (b: Block) => {
@@ -227,13 +249,13 @@ export default function BuildMode() {
         const b = blocksRef.current.find((x) => x.id === onBlock.getAttribute("data-block-id"));
         if (!b) return;
         if (e.shiftKey) return void breakOne(b);
-        if (!b.pending) void drop({ anchor: `block:${b.id}`, dx: 0 });
+        if (!b.pending) void drop({ anchor: `block:${b.id}`, dx: 0 }, { x: px, y: py });
         setTip(false);
         return;
       }
       if (t.closest(INTERACTIVE) || e.shiftKey) return;
       if (window.getSelection()?.toString()) return;
-      void drop(resolveLanding(px, py));
+      void drop(resolveLanding(px, py), { x: px, y: py });
       setTip(false);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -279,12 +301,24 @@ export default function BuildMode() {
                 void breakOne(b);
               }}
               className={cn(
-                "absolute rounded-[5px] transition-[top,left] duration-200",
+                "absolute rounded-[5px]",
+                b.pending ? "build-drop" : "transition-[top,left] duration-200",
                 enabled ? "pointer-events-auto cursor-pointer" : "pointer-events-none",
-                t.cls,
-                b.pending && "animate-[blockfall_0.3s_cubic-bezier(.5,0,.75,0)] opacity-80"
+                t.cls
               )}
-              style={{ left: p.x, top: p.y, width: SIZE, height: SIZE, ["--fall" as string]: "-40px" }}
+              style={{
+                left: p.x,
+                top: p.y,
+                width: SIZE,
+                height: SIZE,
+                ...(b.pending
+                  ? {
+                      ["--fx" as string]: `${b.offX ?? 0}px`,
+                      ["--fy" as string]: `${b.offY ?? -40}px`,
+                      animationDuration: `${b.fallMs ?? 300}ms`,
+                    }
+                  : {}),
+              }}
             />
           );
         })}

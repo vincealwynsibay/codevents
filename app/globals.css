@@ -241,6 +241,19 @@
       background-position: -128px 0;
     }
   }
+  /* build mode: a placed block starts at the cursor and falls (ease-in = gravity), squashes on landing */
+  .build-drop {
+    animation-name: build-drop;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    animation-fill-mode: both;
+    transform-origin: 50% 100%;
+  }
+  @keyframes build-drop {
+    0% { transform: translate(var(--fx, 0), var(--fy, 0)) scale(1); opacity: 0.85; }
+    86% { transform: translate(0, 0) scale(1); opacity: 1; animation-timing-function: ease-out; }
+    93% { transform: translate(0, 0) scale(1.12, 0.84); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
   /* block builder */
   @keyframes blockfall {
     from { transform: translateY(var(--fall, 0)); }
