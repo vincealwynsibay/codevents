@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Terminal, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
 import { listPublicEvents } from "@/lib/server/data";
-import { EVENT_TYPE_LABEL, formatRange, getPhase } from "@/lib/domain";
+import { EVENT_TYPE_LABEL, formatDate, formatRange, getPhase } from "@/lib/domain";
+import HeroTerminal, { HeroRow } from "@/components/cli/HeroTerminal";
 import EventCard from "@/components/events/EventCard";
 import EventCover from "@/components/events/EventCover";
 import PhaseBadge from "@/components/events/PhaseBadge";
@@ -25,6 +26,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
     { label: "Podium finishes", value: past.reduce((n, e) => n + e.winners.length, 0) },
     { label: "Coming up", value: upcoming.length + (featured ? 1 : 0) },
   ];
+  const TAGS: Record<string, [string, HeroRow["tone"]]> = {
+    REGISTRATION_OPEN: ["OPEN", "ok"],
+    REGISTRATION_CLOSED: ["CLOSED", "warn"],
+    ONGOING: ["LIVE", "accent"],
+  };
+  const heroRows: HeroRow[] = [...(featured ? [featured] : []), ...upcoming].map((e) => {
+    const [tag, tone] = TAGS[getPhase(e)] ?? ["SOON", "dim"];
+    return {
+      id: e.id,
+      tag,
+      tone,
+      date: formatDate(e.startDate, { year: undefined }),
+      title: e.title,
+      spots: e.capacity !== null ? `${e.registrationCount}/${e.capacity}` : `${e.registrationCount} in`,
+    };
+  });
   const tickerItems = all.length
     ? all.map((e) => `${EVENT_TYPE_LABEL[e.type]} · ${e.title}`)
     : ["Hackathons", "Workshops", "Talks", "Code nights"];
@@ -47,21 +64,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           <div className="absolute right-6 top-14 hidden lg:block xl:right-10">
             <HeroTicket event={featured} />
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-chakra text-xs text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur">
-            <Terminal className="size-3.5 text-blue-300" />
-            <span className="text-blue-300">~/codes</span>
-            <span>$ events --upcoming</span>
-            <span className="blink text-blue-300">▍</span>
-          </div>
-          <h1 className="mt-6 max-w-4xl font-chakra text-5xl font-bold uppercase leading-[0.92] tracking-tight sm:text-7xl">
+          <h1 className=" max-w-4xl font-chakra text-5xl font-bold uppercase leading-[0.92] tracking-tight sm:text-7xl">
             <span className="text-gradient">Build. Learn.</span>
             <br />
             <span className="highlight text-white">Compete.</span>
           </h1>
-          <p className="mt-8 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Hackathons, talks and workshops for computing students at UM Tagum. Sign up with your school account, get
-            your QR ticket, and collect your certificate after.
-          </p>
+          <div className="mt-8">
+            <HeroTerminal rows={heroRows} />
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="font-chakra tracking-wide">
               <Link href={featured ? `/events/${featured.id}` : "/events"}>
