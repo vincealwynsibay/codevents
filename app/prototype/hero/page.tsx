@@ -5,6 +5,7 @@ import { formatDate, getPhase } from "@/lib/domain";
 import { HeroArcade, HeroData, HeroIde, HeroShell } from "@/components/prototype/HeroDirections";
 import type { HeroRow } from "@/components/cli/HeroTerminal";
 import HeroPlay, { Door } from "@/components/prototype/HeroPlay";
+import ShellHero from "@/components/home/ShellHero";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ export const metadata = { title: "Prototype · hero directions", robots: { index
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"] });
 
 const DIRECTIONS = [
+  { key: "shell-arcade", label: "A · Shell × arcade", note: "The shell is the hero, dressed in the arcade look. Decorative, not playable. No mascot." },
   { key: "play", label: "A+B · Play", note: "One window: shell on top, a walkable world below. Doors are folders. ← → space ↑" },
   { key: "shell", label: "A · Shell", note: "The hero is the terminal. Debuggy perches on it." },
   { key: "arcade", label: "B · Arcade", note: "A game title screen: PRESS START, power-ups, bugs on the ground." },
@@ -21,7 +23,7 @@ const DIRECTIONS = [
 
 export default async function HeroDirectionsPage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
   const { d } = await searchParams;
-  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "play";
+  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "shell-arcade";
   const { featured, upcoming, past } = await listPublicEvents();
   const all = [...(featured ? [featured] : []), ...upcoming];
   const TAGS: Record<string, [string, HeroRow["tone"]]> = {
@@ -59,13 +61,21 @@ export default async function HeroDirectionsPage({ searchParams }: { searchParam
       tone: "event" as const,
     })),
     { path: "past", label: "HALL OF FAME", href: "/events?view=past", icon: "/images/sprites/icon-trophy.png", tone: "past" },
-    { path: "me", label: "MY TICKETS", href: "/me", icon: "/images/sprites/debuggy.png", tone: "me" },
+    { path: "me", label: "MY TICKETS", href: "/me", icon: "/images/sprites/icon-trophy.png", tone: "me" },
     { path: "bin/sh", label: "TERMINAL", href: null, icon: "/images/sprites/icon-laptop.png", tone: "shell" },
   ];
   const current = DIRECTIONS.find((x) => x.key === dir)!;
 
   return (
     <div className="pb-28">
+      {dir === "shell-arcade" && (
+        <ShellHero
+          featured={featured}
+          open={!!featured && getPhase(featured) === "REGISTRATION_OPEN"}
+          rows={data.rows}
+          counts={{ contests: data.counts.contests, workshops: data.counts.workshops, talks: data.counts.talks, trophies: data.counts.past }}
+        />
+      )}
       {dir === "play" && <HeroPlay doors={doors} pixelFont={pixel.className} />}
       {dir === "shell" && <HeroShell data={data} />}
       {dir === "arcade" && <HeroArcade data={data} pixelFont={pixel.className} />}

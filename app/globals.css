@@ -241,6 +241,21 @@
       background-position: -128px 0;
     }
   }
+  /* decorative bugs walking along the hero ground line */
+  .bug-walk {
+    animation: bugcrawl 0.45s steps(4) infinite, walk-right 18s linear infinite;
+  }
+  .bug-walk-rev {
+    animation: bugcrawl 0.45s steps(4) infinite, walk-left 22s linear infinite;
+  }
+  @keyframes walk-right {
+    from { left: -40px; transform: rotate(90deg); }
+    to { left: 100%; transform: rotate(90deg); }
+  }
+  @keyframes walk-left {
+    from { left: 100%; transform: rotate(-90deg); }
+    to { left: -40px; transform: rotate(-90deg); }
+  }
   @keyframes bugcrawl96 {
     to {
       background-position: -384px 0;
@@ -257,6 +272,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bug-walk,
+  .bug-walk-rev,
   .marquee-track,
   .blink {
     animation: none;

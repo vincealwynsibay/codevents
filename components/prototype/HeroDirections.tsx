@@ -27,9 +27,8 @@ const px = "[image-rendering:pixelated]";
 export function HeroShell({ data }: { data: HeroData }) {
   const f = data.featured;
   return (
-    <section className="mx-auto max-w-5xl px-4 pb-16 pt-40 sm:px-6">
+    <section className="mx-auto max-w-5xl px-4 pb-16 pt-16 sm:px-6">
       <div className="relative">
-        <img src="/images/sprites/debuggy.png" alt="" className={`absolute -top-[118px] right-10 h-[130px] w-auto ${px} drop-shadow-[0_8px_20px_rgba(3,150,224,0.45)]`} />
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/70 font-mono shadow-[0_40px_100px_-30px_rgba(42,74,255,0.75)] backdrop-blur">
           <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.03] px-4 py-3">
             <span className="size-3 rounded-full bg-red-500/80" />
@@ -126,10 +125,9 @@ export function HeroArcade({ data, pixelFont }: { data: HeroData; pixelFont: str
 
         {/* stage */}
         <div className="relative mt-14 h-40 w-full">
-          <img src="/images/sprites/debuggy.png" alt="" className={`absolute bottom-6 left-[12%] h-32 w-auto ${px}`} />
           <span className="bug-sprite absolute bottom-6 right-[30%] block size-10 rotate-90" />
           <span className="bug-sprite absolute bottom-6 right-[18%] block size-8 rotate-90 [animation-delay:-0.2s]" />
-          <span className="absolute bottom-[110px] left-[calc(12%+120px)] rounded-sm border-2 border-white bg-black px-2 py-1 text-[9px] text-white">
+          <span className="absolute bottom-[110px] left-[12%] rounded-sm border-2 border-white bg-black px-2 py-1 text-[9px] text-white">
             BUGS AHEAD!
           </span>
           <div className="absolute inset-x-0 bottom-0 h-6 border-t-4 border-[#5DA144] bg-[repeating-linear-gradient(90deg,#3f2a1a_0_16px,#4a3220_16px_32px)]" />
@@ -216,9 +214,8 @@ export function HeroIde({ data }: { data: HeroData }) {
             {/* linter */}
             <div className="mt-8 flex items-end gap-3 md:absolute md:bottom-4 md:right-4 md:mt-0">
               <div className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 font-sans text-xs text-emerald-200">
-                <b>Debuggy:</b> 0 bugs found. {f && phase === "REGISTRATION_OPEN" ? "Registration is open. Ship it? 🚀" : "Looking good."}
+                <b>linter:</b> 0 bugs found. {f && phase === "REGISTRATION_OPEN" ? "Registration is open. Ship it? 🚀" : "Looking good."}
               </div>
-              <img src="/images/sprites/debuggy.png" alt="" className={`h-24 w-auto ${px}`} />
             </div>
           </div>
         </div>
