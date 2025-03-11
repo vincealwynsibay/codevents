@@ -16,6 +16,10 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: REPLACE_ME
     availability: [BUILD, RUNTIME]
+  # Public URL, used on posters, QR codes and link previews (no trailing slash).
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://REPLACE_ME.web.app
+    availability: [BUILD, RUNTIME]
   - variable: OWNER_EMAILS
     value: REPLACE_ME@umindanao.edu.ph
     availability: [RUNTIME]

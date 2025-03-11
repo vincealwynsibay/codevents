@@ -10,6 +10,7 @@ or Vercel). Local emulator runs (`pnpm dev:local`) need none of them.
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | both | yes | Firebase project id |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | client | yes | Firebase web app id |
 | `FIREBASE_ADMIN_SDK` | server | not on App Hosting | Service account JSON on one line. Leave empty on App Hosting or Cloud Run, which use Application Default Credentials. |
+| `NEXT_PUBLIC_SITE_URL` | both | yes in production | Public URL, no trailing slash. Used on posters, QR codes and link previews. Default `https://codevents.web.app`. |
 | `OWNER_EMAILS` | server | yes | Comma-separated owner emails. Owners manage officers at `/admin/officers`. |
 | `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN` | both | no | Student sign-in domain. Default `umindanao.edu.ph`. |
 | `CLOUDINARY_URL` | server | no | `cloudinary://<key>:<secret>@<cloud>` enables image uploads. Without it, officers paste image links. |

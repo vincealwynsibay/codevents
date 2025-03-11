@@ -50,6 +50,8 @@ pnpm lint
 
 ## Deploy
 
+Full step-by-step handoff, with a smoke test and troubleshooting: [`docs/DEPLOY.md`](docs/DEPLOY.md). In short:
+
 1. Create a Firebase project. Enable **Authentication → Google** and **Firestore**.
 2. Deploy the locked-down rules: `pnpm deploy:rules`.
 3. Host the Next.js app on **Firebase App Hosting** (recommended: `apphosting.yaml` is included) or Vercel.
