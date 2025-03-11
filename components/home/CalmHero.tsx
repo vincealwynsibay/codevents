@@ -46,7 +46,7 @@ export default function CalmHero({
 
           <div className={cn("grid items-center gap-10 p-6 sm:p-10", wide ? "min-h-[460px] lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:p-16" : "lg:grid-cols-[1fr_1fr]")}>
             <div>
-              <h1 data-anchor="hero-title" className={cn("font-chakra font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff]", wide ? "text-6xl sm:text-8xl" : "text-5xl sm:text-7xl")}>
+              <h1 data-anchor="hero-title" className={cn("font-chakra font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff]", wide ? "text-5xl min-[400px]:text-6xl sm:text-8xl" : "text-5xl sm:text-7xl")}>
                 CODEVENTS
               </h1>
               <p className="mt-6 max-w-md text-sm leading-relaxed text-neutral-400">
