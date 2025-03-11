@@ -6,6 +6,7 @@ import Footer from "@/components/site/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import Terminal from "@/components/cli/Terminal";
 import EasterEggs from "@/components/cli/EasterEggs";
+import BuildMode from "@/components/cli/BuildMode";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
         <Toaster />
         <Terminal />
         <EasterEggs />
+        <BuildMode />
       </body>
     </html>
   );

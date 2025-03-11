@@ -89,7 +89,7 @@ const PHASE_TAG: Record<string, [string, Tone]> = {
 
 const COMMANDS = [
   "help", "man", "ls", "cd", "pwd", "tree", "cat", "gui", "open", "register", "cancel", "ticket",
-  "team", "whoami", "login", "logout", "profile", "winners", "tty", "neofetch", "date", "echo",
+  "team", "whoami", "login", "logout", "profile", "winners", "tty", "build", "neofetch", "date", "echo",
   "clear", "history", "exit", "debug", "coffee", "hack", "sudo",
 ] as const;
 
@@ -107,6 +107,7 @@ const MAN: Record<string, string> = {
   whoami: "whoami               who you're signed in as",
   profile: 'profile [--course "…"] [--year "…"] [--name "…"]   view or set your profile',
   tty: "tty                  full-screen shell that stays open while you navigate",
+  build: "build [off]          turn the page into a sandbox: drop blocks on anything",
   winners: "winners              hall of fame",
 };
 
@@ -394,7 +395,7 @@ export default function Terminal() {
           { text: "you", tone: "accent" },
           { text: "  whoami · login · logout · profile" },
           { text: "shell", tone: "accent" },
-          { text: "  tty · man <cmd> · history · clear · neofetch · date · echo · exit" },
+          { text: "  tty · build · man <cmd> · history · clear · neofetch · date · echo · exit" },
           { text: "try: cd events → ls → cd 1 → cat → register", tone: "dim" }
         );
         break;
@@ -744,6 +745,13 @@ export default function Terminal() {
         setTimeout(() => setShake(false), 600);
         print({ text: "rm: nice try.", tone: "err" });
         break;
+      case "build":
+        window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: arg !== "off" } }));
+        print({ text: arg === "off" ? "build mode off." : "build mode on: click anywhere to drop blocks. esc when you're done.", tone: "ok" });
+        setTty(false);
+        setTimeout(() => setOpen(false), 400);
+        break;
+
       case "debug":
       case "bugs":
         window.dispatchEvent(new Event("codevents:bugs"));

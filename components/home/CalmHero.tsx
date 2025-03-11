@@ -3,13 +3,12 @@ import { Press_Start_2P } from "next/font/google";
 import { CodEvent } from "@/lib/domain";
 import HeroTerminal, { HeroRow } from "@/components/cli/HeroTerminal";
 import OpenShellButton from "@/components/home/OpenShellButton";
-import BuildZone from "@/components/home/BuildZone";
 
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"], display: "swap" });
 
 /**
- * The calmer take: one shell window, a pixel title, one call to action.
- * The arcade lives in two places only: the title and the ground you can build on.
+ * The calmer take: one shell window, a big title, one call to action.
+ * The only pixel-style element left is the PRESS START button. `build` in the shell turns the page into a sandbox.
  */
 export default function CalmHero({ featured, open, rows }: { featured: CodEvent | null; open: boolean; rows: HeroRow[] }) {
   return (
@@ -24,8 +23,8 @@ export default function CalmHero({ featured, open, rows }: { featured: CodEvent 
         }}
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 pt-14 sm:px-6 sm:pt-20">
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/60 font-mono shadow-[0_30px_80px_-30px_rgba(42,74,255,0.6)] backdrop-blur">
+      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pt-20">
+        <div data-solid className="overflow-hidden rounded-2xl border border-white/10 bg-black/60 font-mono shadow-[0_30px_80px_-30px_rgba(42,74,255,0.6)] backdrop-blur">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
             <span className="size-3 rounded-full bg-white/15" />
             <span className="size-3 rounded-full bg-white/15" />
@@ -35,7 +34,7 @@ export default function CalmHero({ featured, open, rows }: { featured: CodEvent 
 
           <div className="grid items-center gap-10 p-6 sm:p-10 lg:grid-cols-[1fr_1fr]">
             <div>
-              <h1 className={`${pixel.className} text-3xl leading-tight text-white [text-shadow:3px_3px_0_#2a4aff] sm:text-[44px]`}>
+              <h1 className="font-chakra text-5xl font-bold uppercase leading-none tracking-tight text-white [text-shadow:3px_3px_0_#2a4aff] sm:text-7xl">
                 CODEVENTS
               </h1>
               <p className="mt-6 max-w-md text-sm leading-relaxed text-neutral-400">
@@ -50,13 +49,15 @@ export default function CalmHero({ featured, open, rows }: { featured: CodEvent 
                   ▶ {open ? "PRESS START" : "SEE EVENTS"}
                 </Link>
                 <OpenShellButton />
+                <span className="text-xs text-neutral-500">
+                  try <span className="text-neutral-300">build</span> in the shell
+                </span>
               </div>
             </div>
             <HeroTerminal rows={rows} />
           </div>
         </div>
 
-        <BuildZone pixelFont={pixel.className} textures />
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ export const metadata = { title: "Prototype · hero directions", robots: { index
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"] });
 
 const DIRECTIONS = [
-  { key: "calm", label: "A · Calm + build", note: "One shell window, pixel title, one button. Build on the ground: click to place, right-click to break, 1–8 to pick." },
+  { key: "calm", label: "A · Calm", note: "One shell window, one button. Type `build` in the shell (press `) to drop blocks on anything on the page." },
   { key: "shell-arcade", label: "A · Shell × arcade", note: "The shell is the hero, dressed in the arcade look. Decorative, not playable. No mascot." },
   { key: "play", label: "A+B · Play", note: "One window: shell on top, a walkable world below. Doors are folders. ← → space ↑" },
   { key: "shell", label: "A · Shell", note: "The hero is the terminal. Debuggy perches on it." },
