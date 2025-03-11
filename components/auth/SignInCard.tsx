@@ -45,7 +45,10 @@ export default function SignInCard({ next, domain }: { next: string; domain: str
   }
 
   return (
-    <div className="panel w-full p-8 text-center">
+    <div className="panel hud relative w-full overflow-hidden p-8 text-center">
+      <div className="grid-bg pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" />
+      <div className="pointer-events-none absolute -top-24 left-1/2 size-64 -translate-x-1/2 rounded-full bg-primary/30 blur-3xl" />
+      <div className="relative">
       <p className="eyebrow">CODES · UM Tagum</p>
       <h1 className="mt-3 font-chakra text-3xl font-bold">Sign in to codevents</h1>
       <p className="mt-3 text-sm text-muted-foreground">
@@ -64,6 +67,7 @@ export default function SignInCard({ next, domain }: { next: string; domain: str
       <p className="mt-6 text-xs text-muted-foreground">
         Officers can sign in with the Google account an owner added.
       </p>
+      </div>
     </div>
   );
 }

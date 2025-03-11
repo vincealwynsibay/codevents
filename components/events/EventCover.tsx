@@ -38,7 +38,10 @@ export default function EventCover({
       className={cn("relative overflow-hidden bg-gradient-to-br", gradients[event.type], className)}
     >
       <div className="grid-bg absolute inset-0 opacity-70" />
-      <div className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10 blur-3xl" />
+      <div className="scanlines absolute inset-0 opacity-60 mix-blend-overlay" />
+      <div className="absolute -right-10 -top-10 size-56 rounded-full bg-white/15 blur-3xl" />
+      <div className="absolute -bottom-16 -left-10 size-56 rounded-full bg-black/40 blur-3xl" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent" />
       <span
         className={cn(
           "absolute -bottom-[0.18em] left-3 select-none whitespace-nowrap font-chakra font-bold leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.35)]",
@@ -52,6 +55,15 @@ export default function EventCover({
       <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-2.5 py-1 backdrop-blur-sm">
         <Image src="/images/codes.png" alt="" width={14} height={14} />
         <span className="font-chakra text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">CODES</span>
+      </div>
+      <div className="absolute right-4 top-4 hidden text-right font-chakra text-[9px] uppercase leading-tight tracking-[0.2em] text-white/50 sm:block">
+        <div>7.4474° N</div>
+        <div>125.8078° E</div>
+      </div>
+      <div className="absolute bottom-3 right-4 flex gap-1">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="h-1 w-3 rounded-full bg-white/40" style={{ opacity: 1 - i * 0.3 }} />
+        ))}
       </div>
     </div>
   );

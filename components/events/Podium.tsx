@@ -24,22 +24,27 @@ export default function Podium({ event }: { event: CodEvent }) {
           <div
             key={prize.place}
             className={cn(
-              "flex flex-col items-center rounded-xl border bg-gradient-to-b p-5 text-center",
+              "relative flex flex-col items-center overflow-hidden rounded-xl border bg-gradient-to-b p-5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]",
               medal[prize.place],
-              prize.place === 1 ? "sm:pb-10 sm:pt-8 order-first sm:order-none" : ""
+              prize.place === 1 ? "hud order-first shadow-[0_20px_60px_-20px_rgba(251,191,36,0.45)] sm:order-none sm:pb-10 sm:pt-8" : ""
             )}
           >
-            <span className="font-chakra text-xs font-bold uppercase tracking-[0.25em]">{PLACE_LABEL[prize.place]}</span>
+            <div className="stripes pointer-events-none absolute inset-0 opacity-40" />
+            <div className="pointer-events-none absolute left-1/2 top-1/3 size-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-current opacity-[0.12] blur-3xl" />
+            <span className="pointer-events-none absolute right-3 top-2 font-chakra text-5xl font-bold leading-none text-outline">
+              {prize.place}
+            </span>
+            <span className="relative font-chakra text-xs font-bold uppercase tracking-[0.25em]">{PLACE_LABEL[prize.place]}</span>
             {prize.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={prize.imageUrl} alt={prize.title} className="my-4 h-24 w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]" />
+              <img src={prize.imageUrl} alt={prize.title} className="relative my-4 h-24 w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]" />
             ) : (
-              <Trophy className="my-6 size-14 opacity-80" />
+              <Trophy className="relative my-6 size-14 opacity-80" />
             )}
-            <p className="font-chakra text-base font-bold text-foreground">{prize.title}</p>
-            {prize.description && <p className="mt-1 text-xs text-muted-foreground">{prize.description}</p>}
+            <p className="relative font-chakra text-base font-bold text-foreground">{prize.title}</p>
+            {prize.description && <p className="relative mt-1 text-xs text-muted-foreground">{prize.description}</p>}
             {winner && (
-              <div className="mt-4 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2">
+              <div className="relative mt-4 w-full rounded-lg border border-white/10 bg-black/50 px-3 py-2 backdrop-blur">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Winner</p>
                 <p className="font-chakra font-bold text-foreground">{winner.name}</p>
                 {winner.members && winner.members.length > 0 && (

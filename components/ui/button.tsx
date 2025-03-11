@@ -5,16 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          "bg-gradient-to-b from-[#4d68ff] to-[#2a44f0] text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_0_0_1px_rgba(42,74,255,0.6),0_8px_24px_-8px_rgba(42,74,255,0.8)] hover:from-[#5b75ff] hover:to-[#3350ff] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_0_0_1px_rgba(90,110,255,0.8),0_10px_32px_-6px_rgba(42,74,255,0.9)] active:translate-y-px",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-white/10 bg-white/[0.03] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-sm hover:border-white/20 hover:bg-white/[0.07] hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",

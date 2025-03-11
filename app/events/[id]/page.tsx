@@ -144,13 +144,13 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
           <section className="lg:mt-10">
-            <h2 className="eyebrow mb-3">About</h2>
+            <h2 className="section-label mb-4">About</h2>
             <div className="prose-event">{event.description}</div>
           </section>
 
           {event.prizes.length > 0 && (
             <section className="mt-12">
-              <h2 className="eyebrow mb-4">
+              <h2 className="section-label mb-5">
                 {event.winners.length > 0 ? "Winners" : phase === "AWAITING_RESULTS" ? "Prizes · results coming soon" : "Prizes"}
               </h2>
               <Podium event={event} />
@@ -158,7 +158,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           )}
 
           <section className="mt-12">
-            <h2 className="eyebrow mb-4">
+            <h2 className="section-label mb-5">
               {event.participation === "TEAM" ? `Teams (${teams.length})` : `Who's going (${registrations.length})`}
             </h2>
             {event.participation === "TEAM" ? (
@@ -205,7 +205,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 function Info({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="panel flex items-start gap-3 p-3">
-      <span className="mt-0.5 text-primary [&_svg]:size-4">{icon}</span>
+      <span className="grid size-8 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-blue-300 shadow-[0_0_16px_-4px_rgba(42,74,255,0.7)] [&_svg]:size-4">
+        {icon}
+      </span>
       <div>
         <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
         <p className="text-foreground">{value}</p>

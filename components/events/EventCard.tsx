@@ -10,9 +10,11 @@ export default function EventCard({ event, showWinner }: { event: CodEvent; show
   return (
     <Link
       href={`/events/${event.id}`}
-      className="group panel flex flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_40px_-12px_rgba(42,74,255,0.45)]"
+      className="group panel hud hud-hover flex flex-col transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_20px_50px_-20px_rgba(42,74,255,0.6)]"
     >
-      <EventCover event={event} className="aspect-[16/9] w-full" />
+      <div className="overflow-hidden rounded-t-xl">
+        <EventCover event={event} className="aspect-[16/9] w-full transition-transform duration-500 group-hover:scale-[1.03]" />
+      </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
           <PhaseBadge phase={phase} />
@@ -20,7 +22,7 @@ export default function EventCard({ event, showWinner }: { event: CodEvent; show
         </div>
         <h3 className="font-chakra text-lg font-bold leading-tight group-hover:text-blue-200">{event.title}</h3>
         {event.tagline && <p className="line-clamp-2 text-sm text-muted-foreground">{event.tagline}</p>}
-        <div className="mt-auto space-y-1.5 pt-2 text-xs text-muted-foreground">
+        <div className="mt-auto space-y-1.5 border-t border-dashed border-white/10 pt-3 text-xs text-muted-foreground">
           <p className="flex items-center gap-2">
             <CalendarDays className="size-3.5" /> {formatDateTime(event.startDate)}
           </p>

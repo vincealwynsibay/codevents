@@ -33,11 +33,16 @@ export default function Countdown({ to, label }: { to: string; label?: string })
       {label && <p className="eyebrow mb-2">{label}</p>}
       <div className="flex gap-2" aria-live="off">
         {cells.map(([unit, value]) => (
-          <div key={unit} className="min-w-[64px] rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-center">
-            <div className="font-chakra text-2xl font-bold tabular-nums sm:text-3xl">
+          <div
+            key={unit}
+            className="relative min-w-[64px] overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-white/[0.07] to-black/40 px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+          >
+            <div className="scanlines pointer-events-none absolute inset-0 opacity-40" />
+            <div className="absolute inset-x-0 top-1/2 h-px bg-black/50" />
+            <div className="relative font-chakra text-2xl font-bold tabular-nums [text-shadow:0_0_18px_rgba(120,140,255,0.55)] sm:text-3xl">
               {now === null ? "--" : String(value).padStart(2, "0")}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{unit}</div>
+            <div className="relative text-[10px] uppercase tracking-widest text-muted-foreground">{unit}</div>
           </div>
         ))}
       </div>

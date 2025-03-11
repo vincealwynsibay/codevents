@@ -188,8 +188,9 @@ export default async function ManageEventPage({
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="panel p-4">
-      <p className="font-chakra text-2xl font-bold tabular-nums">
+    <div className="panel relative overflow-hidden p-4">
+      <div className="dot-bg pointer-events-none absolute -right-4 -top-4 size-20 opacity-30 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
+      <p className="relative font-chakra text-2xl font-bold tabular-nums">
         {value} {sub && <span className="text-sm font-normal text-muted-foreground">{sub}</span>}
       </p>
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>

@@ -32,7 +32,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${chakraPetch.variable} flex min-h-dvh flex-col antialiased`}
       >
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="relative flex-1">
+          <div aria-hidden className="grid-fade pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]" />
+          {children}
+        </main>
         <Footer />
         <Toaster />
       </body>

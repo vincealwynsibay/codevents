@@ -54,7 +54,7 @@ export default async function MyEventsPage() {
       </div>
 
       <section className="mt-12">
-        <h2 className="font-chakra text-xl font-bold uppercase">Upcoming tickets</h2>
+        <h2 className="section-label">Upcoming tickets</h2>
         {upcoming.length === 0 ? (
           <div className="panel mt-4 px-6 py-10 text-center text-muted-foreground">
             You haven&apos;t signed up for anything yet.{" "}
@@ -65,8 +65,9 @@ export default async function MyEventsPage() {
         ) : (
           <div className="mt-4 space-y-4">
             {upcoming.map(({ reg, event, phase }) => (
-              <div key={reg.id} className="panel grid gap-5 p-5 sm:grid-cols-[1fr_auto]">
-                <div className="space-y-2">
+              <div key={reg.id} className="panel hud relative grid gap-5 overflow-hidden p-5 sm:grid-cols-[1fr_auto]">
+                <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 [mask-image:linear-gradient(90deg,black,transparent_60%)]" />
+                <div className="relative space-y-2">
                   <PhaseBadge phase={phase} />
                   <Link href={`/events/${event.id}`} className="block font-chakra text-2xl font-bold hover:text-blue-200">
                     {event.title}
@@ -85,7 +86,8 @@ export default async function MyEventsPage() {
                     )}
                   </p>
                 </div>
-                <div className="sm:w-[180px]">
+                <div className="relative border-t border-dashed border-white/15 pt-5 sm:w-[200px] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0">
+                  <p className="mb-2 text-center font-chakra text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Admit one</p>
                   <TicketQr value={qrPayload(reg)} size={170} />
                 </div>
               </div>
@@ -96,7 +98,7 @@ export default async function MyEventsPage() {
 
       {past.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-chakra text-xl font-bold uppercase">History</h2>
+          <h2 className="section-label">History</h2>
           <div className="panel mt-4 divide-y">
             {past.map(({ reg, event, phase }) => {
               const win = event.winners.find((w) => w.refId === reg.id || w.refId === reg.teamId);
@@ -131,8 +133,9 @@ export default async function MyEventsPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="panel p-4">
-      <p className="font-chakra text-3xl font-bold">{value}</p>
+    <div className="panel relative overflow-hidden p-4">
+      <div className="dot-bg pointer-events-none absolute -right-4 -top-4 size-20 opacity-30 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
+      <p className="relative font-chakra text-3xl font-bold tabular-nums">{value}</p>
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
     </div>
   );

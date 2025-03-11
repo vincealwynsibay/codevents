@@ -87,8 +87,9 @@ export default async function AdminDashboard({
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="panel p-4">
-      <p className="font-chakra text-3xl font-bold">{value}</p>
+    <div className="panel relative overflow-hidden p-4">
+      <div className="dot-bg pointer-events-none absolute -right-4 -top-4 size-20 opacity-30 [mask-image:radial-gradient(circle,black,transparent_70%)]" />
+      <p className="relative font-chakra text-3xl font-bold tabular-nums">{value}</p>
       <p className="truncate text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
     </div>
   );
@@ -105,7 +106,7 @@ function EventList({
 }) {
   return (
     <section>
-      <h2 className="mb-3 font-chakra text-lg font-bold uppercase">{title}</h2>
+      <h2 className="section-label mb-4">{title}</h2>
       {rows.length === 0 ? (
         <div className="panel px-6 py-10 text-center text-sm text-muted-foreground">{empty}</div>
       ) : (
