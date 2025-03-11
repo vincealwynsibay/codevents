@@ -19,7 +19,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const { featured, upcoming, past } = await listPublicEvents();
   const phase = featured ? getPhase(featured) : null;
 
-  const all = [...(featured ? [featured] : []), ...upcoming, ...past];
   const TAGS: Record<string, [string, HeroRow["tone"]]> = {
     REGISTRATION_OPEN: ["OPEN", "ok"],
     REGISTRATION_CLOSED: ["CLOSED", "warn"],
@@ -36,9 +35,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       spots: e.capacity !== null ? `${e.registrationCount}/${e.capacity}` : `${e.registrationCount} in`,
     };
   });
-  const tickerItems = all.length
-    ? all.map((e) => `${EVENT_TYPE_LABEL[e.type]} · ${e.title}`)
-    : ["Hackathons", "Workshops", "Talks", "Code nights"];
 
   return (
     <div className="relative">
@@ -56,19 +52,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       )}
 
       <CalmHero featured={featured} open={phase === "REGISTRATION_OPEN"} rows={heroRows} wide />
-
-      {/* ticker */}
-      <div className="marquee relative overflow-hidden border-y border-white/[0.06] bg-white/[0.02] py-3">
-        <div className="stripes pointer-events-none absolute inset-0 opacity-40" />
-        <div className="marquee-track relative flex w-max gap-10 font-chakra text-sm uppercase tracking-[0.2em] text-muted-foreground">
-          {[...tickerItems, ...tickerItems, ...tickerItems, ...tickerItems].map((t, i) => (
-            <span key={i} className="flex items-center gap-10 whitespace-nowrap">
-              {t}
-              <span className="text-blue-400">✦</span>
-            </span>
-          ))}
-        </div>
-      </div>
 
       <div className="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
         <SectionHeader index="01" title={phase === "ONGOING" ? "Happening now" : "Next up"} />
