@@ -1,12 +1,9 @@
-import { brandOg, OG_SIZE } from "@/lib/og";
+import { brandOg } from "@/lib/og";
 import { EVENT_TYPE_LABEL, formatDate } from "@/lib/domain";
 import { getEvent } from "@/lib/server/data";
 
-export const size = OG_SIZE;
-export const contentType = "image/png";
-export const alt = "codevents event";
-
-export default async function Image({ params }: { params: Promise<{ id: string }> }) {
+/** Link-preview image for an event (1200×630), referenced from the event page's metadata. */
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const event = await getEvent(id);
   if (!event || event.status === "DRAFT") {

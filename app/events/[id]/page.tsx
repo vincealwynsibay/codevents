@@ -30,7 +30,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const event = await getEvent(id);
   if (!event || event.status === "DRAFT") return { title: "Event" };
-  return { title: event.title, description: event.tagline || event.description.slice(0, 160) };
+  const description = event.tagline || event.description.slice(0, 160);
+  const images = [{ url: `/og/event/${event.id}`, width: 1200, height: 630, alt: event.title }];
+  return {
+    title: event.title,
+    description,
+    openGraph: { title: event.title, description, images },
+    twitter: { card: "summary_large_image", title: event.title, description, images },
+  };
 }
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
