@@ -2,14 +2,14 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
 import { listPublicEvents } from "@/lib/server/data";
 import { EVENT_TYPE_LABEL, formatDate, formatRange, getPhase } from "@/lib/domain";
-import HeroTerminal, { HeroRow } from "@/components/cli/HeroTerminal";
+import type { HeroRow } from "@/components/cli/HeroTerminal";
+import CalmHero from "@/components/home/CalmHero";
 import EventCard from "@/components/events/EventCard";
 import EventCover from "@/components/events/EventCover";
 import PhaseBadge from "@/components/events/PhaseBadge";
 import Countdown from "@/components/events/Countdown";
 import ScrambleText from "@/components/events/ScrambleText";
 import SectionHeader from "@/components/site/SectionHeader";
-import HeroTicket from "@/components/site/HeroTicket";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -20,12 +20,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const phase = featured ? getPhase(featured) : null;
 
   const all = [...(featured ? [featured] : []), ...upcoming, ...past];
-  const stats = [
-    { label: "Events hosted", value: all.length },
-    { label: "Sign-ups", value: all.reduce((n, e) => n + e.registrationCount, 0) },
-    { label: "Podium finishes", value: past.reduce((n, e) => n + e.winners.length, 0) },
-    { label: "Coming up", value: upcoming.length + (featured ? 1 : 0) },
-  ];
   const TAGS: Record<string, [string, HeroRow["tone"]]> = {
     REGISTRATION_OPEN: ["OPEN", "ok"],
     REGISTRATION_CLOSED: ["CLOSED", "warn"],
@@ -53,49 +47,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         <div className="absolute left-1/2 top-24 size-[520px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        {error === "not-admin" && (
+      {error === "not-admin" && (
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="mt-6 rounded-md border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-200">
             That page is for CODES officers. Ask an owner to add your email if you should have access.
           </p>
-        )}
+        </div>
+      )}
 
-        <section className="relative pb-10 pt-12 sm:pt-20">
-          <div className="absolute right-6 top-14 hidden lg:block xl:right-10">
-            <HeroTicket event={featured} />
-          </div>
-          <h1 data-anchor="hero-title" className=" max-w-4xl font-chakra text-5xl font-bold uppercase leading-[0.92] tracking-tight sm:text-7xl">
-            <span className="text-gradient">Build. Learn.</span>
-            <br />
-            <span className="highlight text-white">Compete.</span>
-          </h1>
-          <div className="mt-8">
-            <HeroTerminal rows={heroRows} />
-          </div>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="font-chakra tracking-wide">
-              <Link href={featured ? `/events/${featured.id}` : "/events"}>
-                {phase === "REGISTRATION_OPEN" ? "Register for the next event" : "Browse events"} <ArrowRight />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="font-chakra tracking-wide">
-              <Link href="/events?view=past">Past winners</Link>
-            </Button>
-          </div>
-
-          <dl className="relative z-10 mt-12 grid grid-cols-2 overflow-hidden rounded-xl border border-white/[0.08] bg-black/30 backdrop-blur sm:grid-cols-4">
-            {stats.map((s, i) => (
-              <div
-                key={s.label}
-                className={`relative px-5 py-4 ${i > 0 ? "sm:border-l" : ""} ${i % 2 === 1 ? "border-l sm:border-l" : ""} ${i > 1 ? "border-t sm:border-t-0" : ""} border-white/[0.08]`}
-              >
-                <dt className="font-chakra text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.label}</dt>
-                <dd className="mt-1 font-chakra text-3xl font-bold tabular-nums">{String(s.value).padStart(2, "0")}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      </div>
+      <CalmHero featured={featured} open={phase === "REGISTRATION_OPEN"} rows={heroRows} wide />
 
       {/* ticker */}
       <div className="marquee relative overflow-hidden border-y border-white/[0.06] bg-white/[0.02] py-3">
