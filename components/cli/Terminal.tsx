@@ -747,7 +747,7 @@ export default function Terminal() {
         break;
       case "build":
         window.dispatchEvent(new CustomEvent("codevents:build", { detail: { on: arg !== "off" } }));
-        print({ text: arg === "off" ? "build mode off." : "build mode on: click anywhere to drop blocks. esc when you're done.", tone: "ok" });
+        print({ text: arg === "off" ? "building is off. `build` turns it back on." : "building is on: click any empty space to drop a block, right-click one to break it.", tone: "ok" });
         setTty(false);
         setTimeout(() => setOpen(false), 400);
         break;

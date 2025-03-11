@@ -15,7 +15,8 @@ export const metadata = { title: "Prototype · hero directions", robots: { index
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"] });
 
 const DIRECTIONS = [
-  { key: "calm", label: "A · Calm", note: "One shell window, one button. Type `build` in the shell (press `) to drop blocks on anything on the page." },
+  { key: "calm", label: "Calm · current width", note: "Same width as the rest of the site. Click any empty space to drop a block (3 colours, bottom-left)." },
+  { key: "calm-wide", label: "Calm · wide", note: "Nearly full-bleed and taller, bigger title and terminal. Click empty space to build." },
   { key: "shell-arcade", label: "A · Shell × arcade", note: "The shell is the hero, dressed in the arcade look. Decorative, not playable. No mascot." },
   { key: "play", label: "A+B · Play", note: "One window: shell on top, a walkable world below. Doors are folders. ← → space ↑" },
   { key: "shell", label: "A · Shell", note: "The hero is the terminal. Debuggy perches on it." },
@@ -70,8 +71,8 @@ export default async function HeroDirectionsPage({ searchParams }: { searchParam
 
   return (
     <div className="pb-28">
-      {dir === "calm" && (
-        <CalmHero featured={featured} open={!!featured && getPhase(featured) === "REGISTRATION_OPEN"} rows={data.rows} />
+      {(dir === "calm" || dir === "calm-wide") && (
+        <CalmHero featured={featured} open={!!featured && getPhase(featured) === "REGISTRATION_OPEN"} rows={data.rows} wide={dir === "calm-wide"} />
       )}
       {dir === "shell-arcade" && (
         <ShellHero

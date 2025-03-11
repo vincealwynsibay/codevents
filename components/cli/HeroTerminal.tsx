@@ -9,7 +9,7 @@ export type HeroRow = { id: string; tag: string; tone: "ok" | "warn" | "accent" 
 const TONE = { ok: "text-emerald-300", warn: "text-amber-300", accent: "text-blue-300", dim: "text-neutral-500" };
 
 /** A small terminal that "runs" two commands and prints real upcoming events. */
-export default function HeroTerminal({ rows }: { rows: HeroRow[] }) {
+export default function HeroTerminal({ rows, className, maxRows = 4 }: { rows: HeroRow[]; className?: string; maxRows?: number }) {
   const script = ["whoami", "events --upcoming"];
   const [typed, setTyped] = useState<string[]>(["", ""]);
   const [stage, setStage] = useState(0); // 0: typing cmd1, 1: out1, 2: typing cmd2, 3: rows
@@ -56,7 +56,7 @@ export default function HeroTerminal({ rows }: { rows: HeroRow[] }) {
   );
 
   return (
-    <div data-solid className="max-w-xl overflow-hidden rounded-xl border border-white/10 bg-black/60 font-mono text-[12.5px] shadow-[0_20px_50px_-25px_rgba(42,74,255,0.7)] backdrop-blur">
+    <div data-solid className={cn("max-w-xl overflow-hidden rounded-xl border border-white/10 bg-black/60 font-mono text-[12.5px] shadow-[0_20px_50px_-25px_rgba(42,74,255,0.7)] backdrop-blur", className)}>
       <div className="flex items-center gap-1.5 border-b border-white/10 bg-white/[0.03] px-3 py-2">
         <span className="size-2.5 rounded-full bg-red-500/70" />
         <span className="size-2.5 rounded-full bg-amber-400/70" />
@@ -86,7 +86,7 @@ export default function HeroTerminal({ rows }: { rows: HeroRow[] }) {
             {rows.length === 0 ? (
               <div className="text-neutral-500">nothing scheduled yet. check back soon.</div>
             ) : (
-              rows.slice(0, 4).map((r, i) => (
+              rows.slice(0, maxRows).map((r, i) => (
                 <Link
                   key={r.id}
                   href={`/events/${r.id}`}
