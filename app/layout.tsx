@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, Geist } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { ClerkProvider } from "@clerk/nextjs";
-
-import { dark } from "@clerk/themes";
+import Navbar from "@/components/site/Navbar";
+import Footer from "@/components/site/Footer";
 import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
@@ -13,52 +10,32 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const chakraPetchMono = Chakra_Petch({
+const chakraPetch = Chakra_Petch({
   variable: "--font-chakra",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "codevents",
-  description: "| UMTC Hackathon Events",
-  icons: {
-    icon: [
-      {
-        url: "/favicon.ico",
-      },
-    ],
-  },
+  title: { default: "codevents", template: "%s · codevents" },
+  description:
+    "Hackathons, talks and workshops by CODES — UM Tagum College's computing society.",
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      appearance={{
-        baseTheme: dark,
-        elements: {
-          footer: "hidden",
-        },
-      }}
-    >
-      <html lang="en">
-        <head>
-          <link rel="icon" href="/images/favicon.ico" sizes="any" />
-        </head>
-        <body
-          className={`${geistSans.variable} ${chakraPetchMono.variable} antialiased bg-[radial-gradient(circle,_rgba(255,255,255,0.08)_10%,_rgba(0,0,0,1)_80%)] `}
-        >
-          <Navbar />
-          {children}
-          <Footer />
-          <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${chakraPetch.variable} flex min-h-dvh flex-col antialiased`}
+      >
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <Toaster />
+      </body>
+    </html>
   );
 }

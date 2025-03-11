@@ -1,4 +1,3 @@
-import { Chakra_Petch } from "next/font/google";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -11,6 +10,8 @@ export default {
   theme: {
     extend: {
       colors: {
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -58,7 +59,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        chakra: ["var(--font-chakra)"],
+        chakra: ["var(--font-chakra)", "ui-monospace", "monospace"],
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },
