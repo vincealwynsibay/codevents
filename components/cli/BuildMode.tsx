@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
   - Click empty space or plain text to drop a block. Links, buttons, inputs, cards
     and the shell keep their normal behaviour. Click a block to stack on it.
   - Right-click your own block to break it (officers can break any).
-  - Placing needs a sign-in; everyone can see. 3 colours. Limits are server-side.
+  - Anyone can build: guests get a cookie id (8 blocks/page, fade after 24 h),
+    signed-in students get 20 that stay. 3 colours. Limits are server-side.
   - Blocks only land on stable things marked with data-anchor (same for every viewer),
     other blocks, or the bottom of the page.
 */
@@ -29,7 +30,18 @@ type TypeId = (typeof TYPES)[number]["id"];
 const INTERACTIVE =
   "a, button, input, textarea, select, label, summary, [role=button], [role=dialog], [contenteditable], [data-build-ui], header, [aria-label='CODES terminal'], [aria-label^='Game'], [aria-label^='Block builder']";
 
-type Block = { id: string; anchor: string; dx: number; type: TypeId; uid: string; name: string; createdAt: number; pending?: boolean };
+type Block = {
+  id: string;
+  anchor: string;
+  dx: number;
+  type: TypeId;
+  uid: string;
+  name: string;
+  guest?: boolean;
+  createdAt: number;
+  expiresAt?: number;
+  pending?: boolean;
+};
 
 const anchorEl = (name: string) => document.querySelector(`[data-anchor="${CSS.escape(name)}"]`);
 
@@ -86,7 +98,13 @@ export default function BuildMode() {
     const unsub = onSnapshot(
       q,
       (snap) => {
-        setRemote(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Block, "id">) })));
+        const now = Date.now();
+        // guest blocks expire after 24 h (the server sweeps them on the next placement)
+        setRemote(
+          snap.docs
+            .map((d) => ({ id: d.id, ...(d.data() as Omit<Block, "id">) }))
+            .filter((b) => !b.expiresAt || b.expiresAt > now)
+        );
       },
       (err) => console.warn("[build] live updates unavailable:", err.message)
     );
@@ -174,7 +192,7 @@ export default function BuildMode() {
       // the live snapshot brings the real block in; drop the placeholder either way
       setTimeout(() => setPending((p) => p.filter((b) => b.id !== tempId)), res.ok ? 400 : 0);
       if (!res.ok) {
-        say(res.error === "Please sign in first." ? "sign in to build: press ` and type login" : res.error);
+        say(res.error);
       }
     },
     [pathname]
@@ -190,7 +208,7 @@ export default function BuildMode() {
         n.delete(b.id);
         return n;
       });
-      say(res.error === "Please sign in first." ? "sign in to build: press ` and type login" : res.error);
+      say(res.error);
     }
   }, []);
 
@@ -254,7 +272,7 @@ export default function BuildMode() {
             <span
               key={b.id}
               data-block-id={b.id}
-              title={b.pending ? "placing…" : `placed by ${b.name}`}
+              title={b.pending ? "placing…" : b.guest ? "placed by a guest · fades in 24h" : `placed by ${b.name}`}
               onContextMenu={(e) => {
                 if (!enabled) return;
                 e.preventDefault();
@@ -315,7 +333,7 @@ export default function BuildMode() {
         <div data-build-ui className="no-print fixed bottom-16 left-4 z-[57] hidden max-w-[280px] rounded-lg border border-white/10 bg-black/85 px-3 py-2 font-mono text-[11px] text-neutral-300 shadow-xl backdrop-blur [@media(pointer:fine)]:block">
           {toast ?? (
             <>
-              psst: click any empty space to drop a block. everyone sees them, live. right-click yours to break it.
+              psst: click any empty space to drop a block. everyone sees them, live. right-click yours to break it. no sign-in needed.
               <button onClick={dismissTip} className="ml-2 text-neutral-500 hover:text-white">
                 got it
               </button>
