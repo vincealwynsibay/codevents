@@ -4,6 +4,7 @@ import { listPublicEvents } from "@/lib/server/data";
 import { formatDate, getPhase } from "@/lib/domain";
 import { HeroArcade, HeroData, HeroIde, HeroShell } from "@/components/prototype/HeroDirections";
 import type { HeroRow } from "@/components/cli/HeroTerminal";
+import HeroPlay, { Door } from "@/components/prototype/HeroPlay";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ export const metadata = { title: "Prototype · hero directions", robots: { index
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"] });
 
 const DIRECTIONS = [
+  { key: "play", label: "A+B · Play", note: "One window: shell on top, a walkable world below. Doors are folders. ← → space ↑" },
   { key: "shell", label: "A · Shell", note: "The hero is the terminal. Debuggy perches on it." },
   { key: "arcade", label: "B · Arcade", note: "A game title screen: PRESS START, power-ups, bugs on the ground." },
   { key: "ide", label: "C · IDE", note: "An editor: file tree, the next event as code, Debuggy as the linter." },
@@ -19,7 +21,7 @@ const DIRECTIONS = [
 
 export default async function HeroDirectionsPage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
   const { d } = await searchParams;
-  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "shell";
+  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "play";
   const { featured, upcoming, past } = await listPublicEvents();
   const all = [...(featured ? [featured] : []), ...upcoming];
   const TAGS: Record<string, [string, HeroRow["tone"]]> = {
@@ -41,10 +43,30 @@ export default async function HeroDirectionsPage({ searchParams }: { searchParam
       past: past.reduce((n, e) => n + e.winners.length, 0),
     },
   };
+  const slug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const ICONS: Record<string, string> = {
+    CONTEST: "/images/sprites/icon-laptop.png",
+    TALK: "/images/sprites/icon-mic.png",
+    WORKSHOP: "/images/sprites/icon-tools.png",
+    OTHER: "/images/sprites/icon-trophy.png",
+  };
+  const doors: Door[] = [
+    ...all.slice(0, 3).map((e) => ({
+      path: `events/${slug(e.title)}`,
+      label: e.title.length > 18 ? e.title.slice(0, 17).toUpperCase() + "…" : e.title.toUpperCase(),
+      href: `/events/${e.id}`,
+      icon: ICONS[e.type],
+      tone: "event" as const,
+    })),
+    { path: "past", label: "HALL OF FAME", href: "/events?view=past", icon: "/images/sprites/icon-trophy.png", tone: "past" },
+    { path: "me", label: "MY TICKETS", href: "/me", icon: "/images/sprites/debuggy.png", tone: "me" },
+    { path: "bin/sh", label: "TERMINAL", href: null, icon: "/images/sprites/icon-laptop.png", tone: "shell" },
+  ];
   const current = DIRECTIONS.find((x) => x.key === dir)!;
 
   return (
     <div className="pb-28">
+      {dir === "play" && <HeroPlay doors={doors} pixelFont={pixel.className} />}
       {dir === "shell" && <HeroShell data={data} />}
       {dir === "arcade" && <HeroArcade data={data} pixelFont={pixel.className} />}
       {dir === "ide" && <HeroIde data={data} />}
