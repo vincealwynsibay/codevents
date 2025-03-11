@@ -6,6 +6,7 @@ import { HeroArcade, HeroData, HeroIde, HeroShell } from "@/components/prototype
 import type { HeroRow } from "@/components/cli/HeroTerminal";
 import HeroPlay, { Door } from "@/components/prototype/HeroPlay";
 import ShellHero from "@/components/home/ShellHero";
+import CalmHero from "@/components/home/CalmHero";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export const metadata = { title: "Prototype · hero directions", robots: { index
 const pixel = Press_Start_2P({ weight: "400", subsets: ["latin"] });
 
 const DIRECTIONS = [
+  { key: "calm", label: "A · Calm + build", note: "One shell window, pixel title, one button. Build on the ground: click to place, right-click to break, 1–8 to pick." },
   { key: "shell-arcade", label: "A · Shell × arcade", note: "The shell is the hero, dressed in the arcade look. Decorative, not playable. No mascot." },
   { key: "play", label: "A+B · Play", note: "One window: shell on top, a walkable world below. Doors are folders. ← → space ↑" },
   { key: "shell", label: "A · Shell", note: "The hero is the terminal. Debuggy perches on it." },
@@ -23,7 +25,7 @@ const DIRECTIONS = [
 
 export default async function HeroDirectionsPage({ searchParams }: { searchParams: Promise<{ d?: string }> }) {
   const { d } = await searchParams;
-  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "shell-arcade";
+  const dir = DIRECTIONS.find((x) => x.key === d)?.key ?? "calm";
   const { featured, upcoming, past } = await listPublicEvents();
   const all = [...(featured ? [featured] : []), ...upcoming];
   const TAGS: Record<string, [string, HeroRow["tone"]]> = {
@@ -68,6 +70,9 @@ export default async function HeroDirectionsPage({ searchParams }: { searchParam
 
   return (
     <div className="pb-28">
+      {dir === "calm" && (
+        <CalmHero featured={featured} open={!!featured && getPhase(featured) === "REGISTRATION_OPEN"} rows={data.rows} />
+      )}
       {dir === "shell-arcade" && (
         <ShellHero
           featured={featured}

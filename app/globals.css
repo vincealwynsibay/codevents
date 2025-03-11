@@ -241,6 +241,14 @@
       background-position: -128px 0;
     }
   }
+  /* block builder */
+  @keyframes blockfall {
+    from { transform: translateY(var(--fall, 0)); }
+    to { transform: translateY(0); }
+  }
+  @keyframes particle {
+    to { transform: translate(var(--dx), calc(var(--dy) * -1)) rotate(180deg); opacity: 0; }
+  }
   /* decorative bugs walking along the hero ground line */
   .bug-walk {
     animation: bugcrawl 0.45s steps(4) infinite, walk-right 18s linear infinite;
