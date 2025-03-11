@@ -117,7 +117,7 @@ function EventList({
               href={`/admin/events/${event.id}`}
               className="flex flex-wrap items-center gap-3 p-4 transition-colors hover:bg-white/[0.03]"
             >
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-full sm:basis-0">
                 <p className="font-medium">{event.title}</p>
                 <p className="text-xs text-muted-foreground">{formatDateTime(event.startDate)} · {event.venue}</p>
               </div>
@@ -126,7 +126,7 @@ function EventList({
                 {event.capacity !== null && `/${event.capacity}`} signed up
               </span>
               <PhaseBadge phase={phase} />
-              <ArrowRight className="size-4 text-muted-foreground" />
+              <ArrowRight className="ml-auto size-4 text-muted-foreground sm:ml-0" />
             </Link>
           ))}
         </div>
